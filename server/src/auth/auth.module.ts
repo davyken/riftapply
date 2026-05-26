@@ -9,7 +9,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { Agent, AgentSchema } from '../agents/schemas/agent.schema';
 import { University, UniversitySchema } from '../universities/schemas/university.schema';
+import { Otp, OtpSchema } from './schemas/otp.schema';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -25,8 +27,10 @@ import { CloudinaryModule } from '../cloudinary/cloudinary.module';
       { name: User.name, schema: UserSchema },
       { name: Agent.name, schema: AgentSchema },
       { name: University.name, schema: UniversitySchema },
+      { name: Otp.name, schema: OtpSchema },
     ]),
     CloudinaryModule,
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

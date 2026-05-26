@@ -38,6 +38,9 @@ export class User {
 
   @Prop()
   desiredModule: string;
+
+  @Prop({ default: false })
+  emailVerified: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

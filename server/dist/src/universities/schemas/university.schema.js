@@ -88,6 +88,7 @@ let University = class University {
     status;
     rejectionReason;
     isVerified;
+    emailVerified;
 };
 exports.University = University;
 __decorate([
@@ -150,6 +151,10 @@ __decorate([
     (0, mongoose_1.Prop)({ default: false }),
     __metadata("design:type", Boolean)
 ], University.prototype, "isVerified", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: false }),
+    __metadata("design:type", Boolean)
+], University.prototype, "emailVerified", void 0);
 exports.University = University = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], University);

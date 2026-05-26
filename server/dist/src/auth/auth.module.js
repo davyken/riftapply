@@ -18,7 +18,9 @@ const jwt_strategy_1 = require("./strategies/jwt.strategy");
 const user_schema_1 = require("../users/schemas/user.schema");
 const agent_schema_1 = require("../agents/schemas/agent.schema");
 const university_schema_1 = require("../universities/schemas/university.schema");
+const otp_schema_1 = require("./schemas/otp.schema");
 const cloudinary_module_1 = require("../cloudinary/cloudinary.module");
+const mail_module_1 = require("../mail/mail.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -37,8 +39,10 @@ exports.AuthModule = AuthModule = __decorate([
                 { name: user_schema_1.User.name, schema: user_schema_1.UserSchema },
                 { name: agent_schema_1.Agent.name, schema: agent_schema_1.AgentSchema },
                 { name: university_schema_1.University.name, schema: university_schema_1.UniversitySchema },
+                { name: otp_schema_1.Otp.name, schema: otp_schema_1.OtpSchema },
             ]),
             cloudinary_module_1.CloudinaryModule,
+            mail_module_1.MailModule,
         ],
         controllers: [auth_controller_1.AuthController],
         providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy],

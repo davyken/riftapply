@@ -55,6 +55,9 @@ export class Agent {
 
   @Prop({ default: false })
   isVerified: boolean;
+
+  @Prop({ default: false })
+  emailVerified: boolean;
 }
 
 export const AgentSchema = SchemaFactory.createForClass(Agent);

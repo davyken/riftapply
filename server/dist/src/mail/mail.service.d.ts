@@ -1,13 +1,15 @@
 import { ConfigService } from '@nestjs/config';
-export interface SendMailOptions {
-    to: string;
-    subject: string;
-    html: string;
-}
 export declare class MailService {
     private config;
     private readonly logger;
-    private transporter;
+    private resend;
+    private fromEmail;
     constructor(config: ConfigService);
-    sendMail(options: SendMailOptions): Promise<void>;
+    sendVerificationCode(to: string, code: string, name: string): Promise<void>;
+    sendMail(options: {
+        to: string;
+        subject: string;
+        html: string;
+    }): Promise<void>;
+    sendPasswordResetCode(to: string, code: string, name: string): Promise<void>;
 }

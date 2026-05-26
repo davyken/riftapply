@@ -29,6 +29,7 @@ let Agent = class Agent {
     status;
     rejectionReason;
     isVerified;
+    emailVerified;
 };
 exports.Agent = Agent;
 __decorate([
@@ -95,6 +96,10 @@ __decorate([
     (0, mongoose_1.Prop)({ default: false }),
     __metadata("design:type", Boolean)
 ], Agent.prototype, "isVerified", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: false }),
+    __metadata("design:type", Boolean)
+], Agent.prototype, "emailVerified", void 0);
 exports.Agent = Agent = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Agent);

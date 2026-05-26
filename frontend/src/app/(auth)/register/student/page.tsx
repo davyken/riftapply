@@ -3,12 +3,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { GraduationCap, Eye, EyeOff, ArrowLeft, User } from 'lucide-react';
 import { authApi } from '@/lib/api/auth.api';
-import { useAuthStore } from '@/lib/store/auth.store';
 
 export default function StudentRegisterPage() {
   const router = useRouter();
-  const setAuth = useAuthStore((s) => s.setAuth);
-
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', password: '', confirmPassword: '',
     phone: '', city: '', desiredField: '', desiredModule: '',
@@ -43,9 +40,8 @@ export default function StudentRegisterPage() {
       }
 
       const res = await authApi.registerStudent(data);
-      const { token, user } = res.data;
-      setAuth(user, token, 'student');
-      router.push('/student');
+      const { email } = res.data;
+      router.push(`/verify-email?email=${encodeURIComponent(email || form.email)}&role=student`);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Registration failed');
     } finally {

@@ -86,6 +86,9 @@ export class University {
 
   @Prop({ default: false })
   isVerified: boolean;
+
+  @Prop({ default: false })
+  emailVerified: boolean;
 }
 
 export const UniversitySchema = SchemaFactory.createForClass(University);

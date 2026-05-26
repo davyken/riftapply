@@ -42,8 +42,9 @@ export default function UniversityRegisterPage() {
 
     setLoading(true);
     try {
-      await authApi.registerUniversity(data);
-      setSuccess(true);
+      const res = await authApi.registerUniversity(data);
+      const { email: returnedEmail } = res.data;
+      router.push(`/verify-email?email=${encodeURIComponent(returnedEmail || form.email)}&role=university`);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Registration failed');
     } finally {

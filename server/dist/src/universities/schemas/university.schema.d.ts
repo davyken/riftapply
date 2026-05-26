@@ -31,6 +31,7 @@ export declare class University {
     status: AccountStatus;
     rejectionReason: string;
     isVerified: boolean;
+    emailVerified: boolean;
 }
 export declare const UniversitySchema: import("mongoose").Schema<University, import("mongoose").Model<University, any, any, any, any, any, University>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, University, Document<unknown, {}, University, {
     id: string;
@@ -168,6 +169,15 @@ export declare const UniversitySchema: import("mongoose").Schema<University, imp
         id: string;
     }> | undefined;
     isVerified?: import("mongoose").SchemaDefinitionProperty<boolean, University, Document<unknown, {}, University, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<University & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+    emailVerified?: import("mongoose").SchemaDefinitionProperty<boolean, University, Document<unknown, {}, University, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<University & {
         _id: import("mongoose").Types.ObjectId;

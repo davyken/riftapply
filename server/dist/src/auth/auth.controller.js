@@ -53,8 +53,79 @@ const auth_service_1 = require("./auth.service");
 const bcrypt = __importStar(require("bcrypt"));
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
+const class_validator_1 = require("class-validator");
 const register_dto_1 = require("./dto/register.dto");
 const multer_config_1 = require("../common/multer.config");
+class VerifyEmailDto {
+    email;
+    code;
+    role;
+}
+__decorate([
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], VerifyEmailDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], VerifyEmailDto.prototype, "code", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], VerifyEmailDto.prototype, "role", void 0);
+class ResendCodeDto {
+    email;
+    role;
+}
+__decorate([
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], ResendCodeDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ResendCodeDto.prototype, "role", void 0);
+class ForgotPasswordDto {
+    email;
+    role;
+}
+__decorate([
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], ForgotPasswordDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ForgotPasswordDto.prototype, "role", void 0);
+class ResetPasswordDto {
+    email;
+    code;
+    newPassword;
+    role;
+}
+__decorate([
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], ResetPasswordDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ResetPasswordDto.prototype, "code", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(6),
+    __metadata("design:type", String)
+], ResetPasswordDto.prototype, "newPassword", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ResetPasswordDto.prototype, "role", void 0);
 let AuthController = class AuthController {
     authService;
     userModel;
@@ -77,6 +148,7 @@ let AuthController = class AuthController {
             phone: '+1-000-000-0000',
             role: 'admin',
             status: 'active',
+            emailVerified: true,
         });
         return { message: 'Admin created successfully!' };
     }
@@ -88,6 +160,18 @@ let AuthController = class AuthController {
     }
     registerUniversity(dto, logo) {
         return this.authService.registerUniversity(dto, logo);
+    }
+    verifyEmail(dto) {
+        return this.authService.verifyEmail(dto.email, dto.code, dto.role);
+    }
+    resendVerificationCode(dto) {
+        return this.authService.resendVerificationCode(dto.email, dto.role);
+    }
+    forgotPassword(dto) {
+        return this.authService.forgotPassword(dto.email, dto.role);
+    }
+    resetPassword(dto) {
+        return this.authService.resetPassword(dto.email, dto.code, dto.newPassword, dto.role);
     }
     async getAvatar(name, res) {
         const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || 'User')}`;
@@ -135,6 +219,36 @@ __decorate([
     __metadata("design:paramtypes", [register_dto_1.RegisterUniversityDto, Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "registerUniversity", null);
+__decorate([
+    (0, common_1.Post)('verify-email'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [VerifyEmailDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "verifyEmail", null);
+__decorate([
+    (0, common_1.Post)('resend-code'),
+    (0, throttler_1.Throttle)({ auth: { ttl: 60000, limit: 3 } }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [ResendCodeDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "resendVerificationCode", null);
+__decorate([
+    (0, common_1.Post)('forgot-password'),
+    (0, throttler_1.Throttle)({ auth: { ttl: 60000, limit: 5 } }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [ForgotPasswordDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "forgotPassword", null);
+__decorate([
+    (0, common_1.Post)('reset-password'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [ResetPasswordDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "resetPassword", null);
 __decorate([
     (0, common_1.Get)('avatar'),
     __param(0, (0, common_1.Query)('name')),

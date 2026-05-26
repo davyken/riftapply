@@ -56,8 +56,9 @@ export default function AgentRegisterPage() {
 
     setLoading(true);
     try {
-      await authApi.registerAgent(data);
-      setSuccess(true);
+      const res = await authApi.registerAgent(data);
+      const { email: returnedEmail } = res.data;
+      router.push(`/verify-email?email=${encodeURIComponent(returnedEmail || form.email)}&role=agent`);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Registration failed');
     } finally {

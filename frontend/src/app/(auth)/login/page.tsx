@@ -1,8 +1,8 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { GraduationCap, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { GraduationCap, Eye, EyeOff, ArrowLeft, Clock } from 'lucide-react';
 import { authApi } from '@/lib/api/auth.api';
 import { useAuthStore } from '@/lib/store/auth.store';
 
@@ -22,9 +22,13 @@ const ROLE_REDIRECT: Record<Role, string> = {
   admin: '/admin',
 };
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const params = useSearchParams();
   const setAuth = useAuthStore((s) => s.setAuth);
+
+  const notice = params.get('notice'); // 'pending'
+  const noticeRole = params.get('role') || '';
 
   const [role, setRole] = useState<Role>('student');
   const [email, setEmail] = useState('');
@@ -59,7 +63,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex" suppressHydrationWarning>
       {/* ── Left panel ── */}
       <div
         className="hidden lg:flex lg:w-[52%] flex-col justify-between p-10 relative overflow-hidden"
@@ -122,6 +126,18 @@ export default function LoginPage() {
             <ArrowLeft size={16} /> Back to Home
           </Link>
 
+          {notice === 'pending' && (
+            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5">
+              <Clock size={18} className="text-amber-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-amber-800">Account Pending Approval</p>
+                <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                  Your email is verified! Your {noticeRole} account is now pending admin review. You'll be able to log in once approved — usually within 15–30 minutes during business hours.
+                </p>
+              </div>
+            </div>
+          )}
+
           <h2 className="text-2xl font-bold text-gray-900 text-center mb-1">Welcome Back</h2>
           <p className="text-sm text-gray-500 text-center mb-6">Please select your role and enter your details.</p>
 
@@ -162,7 +178,7 @@ export default function LoginPage() {
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label className="block text-sm font-medium text-gray-700">Password</label>
-                <a href="#" className="text-xs text-blue-600 hover:underline">Forgot password?</a>
+                <a href={`/forgot-password`} className="text-xs text-blue-600 hover:underline">Forgot password?</a>
               </div>
               <div className="relative">
                 <input
@@ -267,5 +283,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" /></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
