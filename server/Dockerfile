@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install app dependencies
-RUN npm ci
+RUN npm install
 
 # Bundle app source
 COPY . .
@@ -23,10 +23,13 @@ WORKDIR /app
 
 COPY package*.json ./
 # Install only production dependencies
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copy the built application from the builder stage
 COPY --from=builder /app/dist ./dist
 
+# Set the port environment variable
+ENV PORT=8080
+
 # Start the server using the production build
-CMD [ "node", "dist/main" ]
+CMD [ "node", "dist/src/main" ]
