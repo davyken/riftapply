@@ -1,49 +1,52 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { GraduationCap, Eye, EyeOff, ArrowLeft, Clock } from 'lucide-react';
 import { authApi } from '@/lib/api/auth.api';
 import { useAuthStore } from '@/lib/store/auth.store';
+import { useT } from '@/lib/i18n/useT';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 
 type Role = 'student' | 'agent' | 'university' | 'admin';
 
-const ROLE_LABELS: Record<Role, string> = {
-  student: 'Student',
-  agent: 'Agent',
-  university: 'University',
-  admin: 'Admin',
-};
-
 const ROLE_REDIRECT: Record<Role, string> = {
-  student: '/student',
-  agent: '/agent',
+  student:    '/student',
+  agent:      '/agent',
   university: '/university',
-  admin: '/admin',
+  admin:      '/admin',
 };
 
 function LoginContent() {
   const router = useRouter();
   const params = useSearchParams();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const { T, t, lang } = useT();
 
-  const notice = params.get('notice'); // 'pending'
+  const notice     = params.get('notice');
   const noticeRole = params.get('role') || '';
 
-  const [role, setRole] = useState<Role>('student');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [role, setRole]                 = useState<Role>('student');
+  const [email, setEmail]               = useState('');
+  const [password, setPassword]         = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember]         = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState('');
+
+  const ROLE_LABELS: Record<Role, string> = {
+    student:    T(t.login.roles.student),
+    agent:      T(t.login.roles.agent),
+    university: T(t.login.roles.university),
+    admin:      T(t.login.roles.admin),
+  };
 
   const loginFns: Record<Role, (e: string, p: string) => ReturnType<typeof authApi.loginStudent>> = {
-    student: authApi.loginStudent,
-    agent: authApi.loginAgent,
+    student:    authApi.loginStudent,
+    agent:      authApi.loginAgent,
     university: authApi.loginUniversity,
-    admin: authApi.loginAdmin,
+    admin:      authApi.loginAdmin,
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -75,7 +78,6 @@ function LoginContent() {
             backgroundImage: `repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,.04) 60px,rgba(255,255,255,.04) 61px), repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,.04) 60px,rgba(255,255,255,.04) 61px)`,
           }}
         />
-        {/* bookshelf silhouette rows */}
         <div className="absolute bottom-0 left-0 right-0 h-64 opacity-10"
           style={{
             backgroundImage: `repeating-linear-gradient(90deg, #fff 0px, #fff 8px, transparent 8px, transparent 24px)`,
@@ -94,20 +96,20 @@ function LoginContent() {
 
         {/* Hero text */}
         <div className="relative">
-          <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-            Your gateway to<br />academic excellence.
+          <h1 className="text-4xl font-bold text-white leading-tight mb-4 whitespace-pre-line">
+            {T(t.login.heroTitle)}
           </h1>
           <p className="text-blue-200 text-base leading-relaxed max-w-sm">
-            Join thousands of students and institutions in a streamlined, authoritative admissions journey.
+            {T(t.login.heroSubtitle)}
           </p>
         </div>
 
         {/* Testimonial */}
         <div className="relative bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/10">
           <p className="text-blue-100 text-sm italic leading-relaxed">
-            "The most efficient portal for managing global university applications I've used in a decade."
+            {T(t.login.testimonial)}
           </p>
-          <p className="text-blue-300 text-xs mt-3 font-medium">— Dean of Admissions, Global Heights</p>
+          <p className="text-blue-300 text-xs mt-3 font-medium">{T(t.login.testimonialAuthor)}</p>
         </div>
       </div>
 
@@ -122,24 +124,27 @@ function LoginContent() {
         </div>
 
         <div className="w-full max-w-sm">
-          <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition-colors">
-            <ArrowLeft size={16} /> Back to Home
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+              <ArrowLeft size={16} /> {T(t.nav.backToHome)}
+            </Link>
+            <LanguageToggle />
+          </div>
 
           {notice === 'pending' && (
             <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5">
               <Clock size={18} className="text-amber-500 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-amber-800">Account Pending Approval</p>
+                <p className="text-sm font-semibold text-amber-800">{T(t.login.pendingTitle)}</p>
                 <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
-                  Your email is verified! Your {noticeRole} account is now pending admin review. You'll be able to log in once approved — usually within 15–30 minutes during business hours.
+                  {T(t.login.pendingMsg)}
                 </p>
               </div>
             </div>
           )}
 
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-1">Welcome Back</h2>
-          <p className="text-sm text-gray-500 text-center mb-6">Please select your role and enter your details.</p>
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-1">{T(t.login.title)}</h2>
+          <p className="text-sm text-gray-500 text-center mb-6">{T(t.login.subtitle)}</p>
 
           {/* Role tabs */}
           <div className="flex border border-gray-200 rounded-lg p-1 mb-6 bg-gray-50">
@@ -161,31 +166,29 @@ function LoginContent() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-              <div className="relative">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. name@university.edu"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{T(t.common.email)}</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={T(t.login.emailPlaceholder)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
 
             {/* Password */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <a href={`/forgot-password`} className="text-xs text-blue-600 hover:underline">Forgot password?</a>
+                <label className="block text-sm font-medium text-gray-700">{T(t.common.password)}</label>
+                <a href="/forgot-password" className="text-xs text-blue-600 hover:underline">{T(t.login.forgotPassword)}</a>
               </div>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={T(t.login.passwordPlaceholder)}
                   required
                   className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -207,10 +210,10 @@ function LoginContent() {
                 onChange={(e) => setRemember(e.target.checked)}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-600">Stay signed in for 30 days</span>
+              <span className="text-sm text-gray-600">{T(t.login.staySignedIn)}</span>
             </label>
 
-            {/* Terms of Service */}
+            {/* Terms */}
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -220,7 +223,10 @@ function LoginContent() {
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-0.5"
               />
               <span className="text-sm text-gray-600">
-                I agree to the <a href="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</a> and <a href="/terms-of-service" className="text-blue-600 hover:underline">Terms of Service</a>
+                {T(t.login.agreeTerms)}{' '}
+                <a href="/privacy-policy" className="text-blue-600 hover:underline">{T(t.common.privacy)}</a>{' '}
+                {T(t.login.and)}{' '}
+                <a href="/terms-of-service" className="text-blue-600 hover:underline">{T(t.common.terms)}</a>
               </span>
             </label>
 
@@ -236,14 +242,14 @@ function LoginContent() {
               disabled={loading}
               className="w-full bg-[#1a3a6b] hover:bg-[#163060] disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors"
             >
-              {loading ? 'Signing in…' : `Sign In as ${ROLE_LABELS[role]}`}
+              {loading ? T(t.login.signingIn) : `${T(t.login.signInAs)} ${ROLE_LABELS[role]}`}
             </button>
           </form>
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400 font-medium">OR CONTINUE WITH</span>
+            <span className="text-xs text-gray-400 font-medium">{T(t.login.orContinueWith)}</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
@@ -268,17 +274,17 @@ function LoginContent() {
 
           {role !== 'admin' && (
             <p className="text-center text-sm text-gray-500 mt-6">
-              Don't have an account?{' '}
+              {T(t.login.noAccount)}{' '}
               <a href="/register" className="text-blue-600 font-medium hover:underline">
-                Create an account
+                {T(t.login.createAccount)}
               </a>
             </p>
           )}
 
           <div className="flex justify-center gap-4 mt-6 text-xs text-gray-400">
-            <a href="/privacy-policy" className="hover:text-gray-600">Privacy Policy</a>
-            <a href="/terms-of-service" className="hover:text-gray-600">Terms of Service</a>
-            <a href="/help" className="hover:text-gray-600">Help Center</a>
+            <a href="/privacy-policy" className="hover:text-gray-600">{T(t.common.privacy)}</a>
+            <a href="/terms-of-service" className="hover:text-gray-600">{T(t.common.terms)}</a>
+            <a href="/help" className="hover:text-gray-600">{T(t.common.help)}</a>
           </div>
         </div>
       </div>

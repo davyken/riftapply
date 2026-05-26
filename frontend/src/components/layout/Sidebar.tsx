@@ -25,6 +25,7 @@ import {
 import { useAuthStore } from '@/lib/store/auth.store';
 import { useSidebarStore } from '@/lib/store/sidebar.store';
 import { useNotificationStore } from '@/lib/store/notifications.store';
+import { useT } from '@/lib/i18n/useT';
 import { UserRole } from '@/types';
 
 interface NavItem {
@@ -34,50 +35,8 @@ interface NavItem {
   badge?: number;
 }
 
-const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
-  student: [
-    { label: 'Dashboard',      href: '/student',            icon: <LayoutDashboard size={18} /> },
-    { label: 'Search Schools', href: '/student/search',     icon: <Search size={18} /> },
-    { label: 'My Documents',   href: '/student/documents',  icon: <FileText size={18} /> },
-    { label: 'Messages',       href: '/student/messages',   icon: <MessageSquare size={18} /> },
-  ],
-  agent: [
-    { label: 'Dashboard',           href: '/agent',               icon: <LayoutDashboard size={18} /> },
-    { label: 'Search Schools',      href: '/agent/search',        icon: <Search size={18} /> },
-    { label: 'Students',            href: '/agent/students',      icon: <Users size={18} /> },
-    { label: 'Applications',        href: '/agent/applications',  icon: <ClipboardList size={18} /> },
-    { label: 'Messages',            href: '/agent/messages',      icon: <MessageSquare size={18} /> },
-    { label: 'Company Profile',     href: '/agent/profile',       icon: <Building2 size={18} /> },
-    { label: 'Verification Status', href: '/agent/verification',  icon: <ShieldCheck size={18} /> },
-  ],
-  university: [
-    { label: 'Dashboard',    href: '/university',               icon: <LayoutDashboard size={18} /> },
-    { label: 'Applications', href: '/university/applications',  icon: <ClipboardList size={18} /> },
-    { label: 'My Profile',   href: '/university/profile',       icon: <UserCircle size={18} /> },
-    { label: 'Users',        href: '/university/users',         icon: <Users size={18} /> },
-    { label: 'Emails',       href: '/university/emails',        icon: <Mail size={18} /> },
-    { label: 'Settings',     href: '/university/settings',      icon: <Settings size={18} /> },
-  ],
-  admin: [
-    { label: 'Dashboard',    href: '/admin',                icon: <LayoutDashboard size={18} /> },
-    { label: 'Applications', href: '/admin/applications',   icon: <ClipboardList size={18} /> },
-    { label: 'Students',     href: '/admin/students',       icon: <GraduationCap size={18} /> },
-    { label: 'Agents',       href: '/admin/agents',         icon: <Users size={18} /> },
-    { label: 'Universities', href: '/admin/universities',   icon: <Building2 size={18} /> },
-    { label: 'Emails',       href: '/admin/emails',         icon: <Mail size={18} /> },
-    { label: 'Statistics',   href: '/admin/stats',          icon: <BarChart3 size={18} /> },
-    { label: 'Settings',     href: '/admin/settings',       icon: <Settings size={18} /> },
-  ],
-};
-
-const PORTAL_LABEL: Record<UserRole, string> = {
-  student:    'Student Portal',
-  agent:      'Admissions Portal',
-  university: 'Admissions Portal',
-  admin:      'Admin Portal',
-};
-
-const SHOW_NEW_APP_BTN: UserRole[] = ['agent'];
+// Nav items are built dynamically inside the component using translations
+const SHOW_NEW_APP_BTN_ROLES: UserRole[] = ['agent'];
 
 const BADGE_HREF: Partial<Record<UserRole, string>> = {
   student:    '/student/messages',
@@ -92,11 +51,56 @@ export default function Sidebar() {
   const { user, role, clearAuth } = useAuthStore();
   const { collapsed, toggle, mobileOpen, closeMobile } = useSidebarStore();
   const { unreadCount } = useNotificationStore();
+  const { T, t } = useT();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const currentRole = (role || 'student') as UserRole;
-  const navItems    = NAV_BY_ROLE[currentRole] || [];
   const badgeHref   = BADGE_HREF[currentRole];
+
+  const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
+    student: [
+      { label: T(t.common.dashboard),     href: '/student',           icon: <LayoutDashboard size={18} /> },
+      { label: T(t.sidebar.searchSchools),href: '/student/search',    icon: <Search size={18} /> },
+      { label: T(t.sidebar.myDocuments),  href: '/student/documents', icon: <FileText size={18} /> },
+      { label: T(t.common.messages),      href: '/student/messages',  icon: <MessageSquare size={18} /> },
+    ],
+    agent: [
+      { label: T(t.common.dashboard),          href: '/agent',              icon: <LayoutDashboard size={18} /> },
+      { label: T(t.sidebar.searchSchools),     href: '/agent/search',       icon: <Search size={18} /> },
+      { label: T(t.common.students),           href: '/agent/students',     icon: <Users size={18} /> },
+      { label: T(t.common.applications),       href: '/agent/applications', icon: <ClipboardList size={18} /> },
+      { label: T(t.common.messages),           href: '/agent/messages',     icon: <MessageSquare size={18} /> },
+      { label: T(t.sidebar.companyProfile),    href: '/agent/profile',      icon: <Building2 size={18} /> },
+      { label: T(t.sidebar.verificationStatus),href: '/agent/verification', icon: <ShieldCheck size={18} /> },
+    ],
+    university: [
+      { label: T(t.common.dashboard),    href: '/university',              icon: <LayoutDashboard size={18} /> },
+      { label: T(t.common.applications), href: '/university/applications', icon: <ClipboardList size={18} /> },
+      { label: T(t.sidebar.myProfile),   href: '/university/profile',      icon: <UserCircle size={18} /> },
+      { label: T(t.sidebar.users),       href: '/university/users',        icon: <Users size={18} /> },
+      { label: T(t.common.emails),       href: '/university/emails',       icon: <Mail size={18} /> },
+      { label: T(t.common.settings),     href: '/university/settings',     icon: <Settings size={18} /> },
+    ],
+    admin: [
+      { label: T(t.common.dashboard),    href: '/admin',               icon: <LayoutDashboard size={18} /> },
+      { label: T(t.common.applications), href: '/admin/applications',  icon: <ClipboardList size={18} /> },
+      { label: T(t.common.students),     href: '/admin/students',      icon: <GraduationCap size={18} /> },
+      { label: T(t.common.agents),       href: '/admin/agents',        icon: <Users size={18} /> },
+      { label: T(t.common.universities), href: '/admin/universities',  icon: <Building2 size={18} /> },
+      { label: T(t.common.emails),       href: '/admin/emails',        icon: <Mail size={18} /> },
+      { label: T(t.common.statistics),   href: '/admin/stats',         icon: <BarChart3 size={18} /> },
+      { label: T(t.common.settings),     href: '/admin/settings',      icon: <Settings size={18} /> },
+    ],
+  };
+
+  const PORTAL_LABEL: Record<UserRole, string> = {
+    student:    T(t.sidebar.studentPortal),
+    agent:      T(t.sidebar.agentPortal),
+    university: T(t.sidebar.universityPortal),
+    admin:      T(t.sidebar.adminPortal),
+  };
+
+  const navItems = NAV_BY_ROLE[currentRole] || [];
 
   function logout() {
     clearAuth();
@@ -131,7 +135,7 @@ export default function Sidebar() {
         </div>
 
         {/* ── New Application button (agents only) ── */}
-        {SHOW_NEW_APP_BTN.includes(currentRole) && (
+        {SHOW_NEW_APP_BTN_ROLES.includes(currentRole) && (
           <div className={`pt-4 ${slim ? 'px-2' : 'px-4'}`}>
             <button
               onClick={() => { router.push(`/${currentRole}/applications/new`); if (!isDesktop) closeMobile(); }}
@@ -139,7 +143,7 @@ export default function Sidebar() {
               className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"
             >
               <Plus size={16} />
-              {!slim && <span>New Application</span>}
+              {!slim && <span>{T(t.sidebar.newApplication)}</span>}
             </button>
           </div>
         )}
@@ -191,19 +195,19 @@ export default function Sidebar() {
           <Link
             href="/help"
             onClick={() => { if (!isDesktop) closeMobile(); }}
-            title={slim ? 'Help Center' : undefined}
+            title={slim ? T(t.common.help) : undefined}
             className={`flex items-center gap-3 rounded-lg text-sm font-medium text-blue-200 hover:bg-white/5 hover:text-white transition-colors ${slim ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'}`}
           >
             <HelpCircle size={18} className="text-blue-400 flex-shrink-0" />
-            {!slim && <span>Help Center</span>}
+            {!slim && <span>{T(t.common.help)}</span>}
           </Link>
           <button
             onClick={() => setShowLogoutModal(true)}
-            title={slim ? 'Logout' : undefined}
+            title={slim ? T(t.common.logout) : undefined}
             className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-blue-200 hover:bg-white/5 hover:text-white transition-colors ${slim ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'}`}
           >
             <LogOut size={18} className="text-blue-400 flex-shrink-0" />
-            {!slim && <span>Logout</span>}
+            {!slim && <span>{T(t.common.logout)}</span>}
           </button>
         </div>
 
@@ -211,7 +215,7 @@ export default function Sidebar() {
         {isDesktop && (
           <button
             onClick={toggle}
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? T(t.sidebar.expandSidebar) : T(t.sidebar.collapseSidebar)}
             className="flex items-center justify-center w-6 h-6 rounded-full bg-[#1a3a6b] border border-white/20 text-white hover:bg-blue-500 transition-colors absolute -right-3 top-[72px] z-10 shadow-md"
           >
             {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
@@ -257,21 +261,21 @@ export default function Sidebar() {
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Confirm Logout</h3>
-            <p className="text-sm text-gray-500 mb-6">Are you sure you want to log out of your account?</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{T(t.common.confirmLogout)}</h3>
+            <p className="text-sm text-gray-500 mb-6">{T(t.common.confirmLogoutMsg)}</p>
             <div className="flex items-center gap-3 justify-end">
               <button
                 onClick={() => setShowLogoutModal(false)}
                 className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                Cancel
+                {T(t.common.cancel)}
               </button>
               <button
                 onClick={logout}
                 className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center gap-2"
               >
                 <LogOut size={16} />
-                Logout
+                {T(t.common.logout)}
               </button>
             </div>
           </div>

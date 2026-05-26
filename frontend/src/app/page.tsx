@@ -2,156 +2,37 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   GraduationCap, Menu, X, ChevronDown, ChevronUp,
   Globe, Users, Award, BookOpen, CheckCircle, Star,
   ArrowRight, FileText, Search, Mail, Phone,
   Shield, Clock, TrendingUp, MapPin, Headphones,
 } from 'lucide-react';
+import { useT } from '@/lib/i18n/useT';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 
-/* ─────────────────────────────── helpers ─────────────────────────────── */
-const NAV_LINKS = [
-  { label: 'Home', href: '#home' },
-  { label: 'About', href: '#about' },
-  { label: 'Destinations', href: '#destinations' },
-  { label: 'How It Works', href: '#how-it-works' },
-  { label: 'FAQ', href: '#faq' },
+/* ─────────────────────────── static data (no text) ─────────────────────── */
+const DESTINATION_DATA = [
+  { flag: '🇨🇦', name: 'Canada',         unis: '120', color: 'from-red-50 to-red-100',     border: 'border-red-200',    img: 'https://images.unsplash.com/photo-1517935706615-2717063c2225?w=400&auto=format&fit=crop&q=70' },
+  { flag: '🇬🇧', name: 'United Kingdom', unis: '95',  color: 'from-blue-50 to-blue-100',   border: 'border-blue-200',   img: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&auto=format&fit=crop&q=70' },
+  { flag: '🇺🇸', name: 'United States',  unis: '150', color: 'from-indigo-50 to-indigo-100',border: 'border-indigo-200',img: 'https://images.unsplash.com/photo-1501466044931-62695aada8e9?w=400&auto=format&fit=crop&q=70' },
+  { flag: '🇦🇺', name: 'Australia',      unis: '45',  color: 'from-yellow-50 to-yellow-100',border: 'border-yellow-200',img: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=400&auto=format&fit=crop&q=70' },
+  { flag: '🇩🇪', name: 'Germany',        unis: '60',  color: 'from-gray-50 to-gray-100',   border: 'border-gray-200',   img: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400&auto=format&fit=crop&q=70' },
+  { flag: '🇦🇪', name: 'UAE',            unis: '30',  color: 'from-green-50 to-green-100', border: 'border-green-200',  img: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&auto=format&fit=crop&q=70' },
 ];
 
-const STATS = [
-  { value: '500+', label: 'Partner Universities', icon: <BookOpen size={22} /> },
-  { value: '50 K+', label: 'Students Admitted', icon: <Users size={22} /> },
-  { value: '30+', label: 'Countries Served', icon: <Globe size={22} /> },
-  { value: '98 %', label: 'Success Rate', icon: <TrendingUp size={22} /> },
+const TESTIMONIAL_DATA = [
+  { name: 'Amina Hassan',  country: 'Nigeria → Canada',         program: 'MSc Computer Science, University of Toronto', quoteKey: 't1Quote' as const, rating: 5, img: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=120&auto=format&fit=crop&q=80' },
+  { name: 'Ravi Patel',    country: 'India → United Kingdom',   program: 'MBA, University of Manchester',               quoteKey: 't2Quote' as const, rating: 5, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80' },
+  { name: 'Fatou Diallo',  country: 'Senegal → Australia',      program: 'BEng Mechanical Engineering, UNSW',           quoteKey: 't3Quote' as const, rating: 5, img: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=120&auto=format&fit=crop&q=80' },
 ];
-
-const DESTINATIONS = [
-  { flag: '🇨🇦', name: 'Canada', unis: '120+ universities', color: 'from-red-50 to-red-100', border: 'border-red-200', img: 'https://images.unsplash.com/photo-1517935706615-2717063c2225?w=400&auto=format&fit=crop&q=70' },
-  { flag: '🇬🇧', name: 'United Kingdom', unis: '95+ universities', color: 'from-blue-50 to-blue-100', border: 'border-blue-200', img: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&auto=format&fit=crop&q=70' },
-  { flag: '🇺🇸', name: 'United States', unis: '150+ universities', color: 'from-indigo-50 to-indigo-100', border: 'border-indigo-200', img: 'https://images.unsplash.com/photo-1501466044931-62695aada8e9?w=400&auto=format&fit=crop&q=70' },
-  { flag: '🇦🇺', name: 'Australia', unis: '45+ universities', color: 'from-yellow-50 to-yellow-100', border: 'border-yellow-200', img: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=400&auto=format&fit=crop&q=70' },
-  { flag: '🇩🇪', name: 'Germany', unis: '60+ universities', color: 'from-gray-50 to-gray-100', border: 'border-gray-200', img: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400&auto=format&fit=crop&q=70' },
-  { flag: '🇦🇪', name: 'UAE', unis: '30+ universities', color: 'from-green-50 to-green-100', border: 'border-green-200', img: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&auto=format&fit=crop&q=70' },
-];
-
-const STEPS = [
-  {
-    step: '01',
-    icon: <Users size={26} className="text-[#1a3a6b]" />,
-    title: 'Create Your Account',
-    desc: 'Sign up in minutes. Fill in your basic details and choose whether you\'re a student, agent, or university representative.',
-  },
-  {
-    step: '02',
-    icon: <FileText size={26} className="text-[#1a3a6b]" />,
-    title: 'Build Your Profile',
-    desc: 'Upload your transcripts, language test scores, and personal statement. Our smart form guides you every step.',
-  },
-  {
-    step: '03',
-    icon: <Search size={26} className="text-[#1a3a6b]" />,
-    title: 'Discover & Apply',
-    desc: 'Browse 500+ programs across 30 countries. Filter by scholarship, tuition, intake, and more. Apply with one click.',
-  },
-  {
-    step: '04',
-    icon: <CheckCircle size={26} className="text-[#1a3a6b]" />,
-    title: 'Track & Get Accepted',
-    desc: 'Real-time application tracking, instant notifications on decisions, and dedicated agent support until you land.',
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    name: 'Amina Hassan',
-    country: 'Nigeria → Canada',
-    program: 'MSc Computer Science, University of Toronto',
-    quote: 'riftApply made the whole process feel effortless. I had my acceptance letter within 6 weeks of applying. The agent assigned to me was incredible.',
-    rating: 5,
-    img: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=120&auto=format&fit=crop&q=80',
-  },
-  {
-    name: 'Ravi Patel',
-    country: 'India → United Kingdom',
-    program: 'MBA, University of Manchester',
-    quote: 'I was confused about UCAS vs direct applications. The platform handled everything and even helped me get a partial scholarship. Truly life-changing.',
-    rating: 5,
-    img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80',
-  },
-  {
-    name: 'Fatou Diallo',
-    country: 'Senegal → Australia',
-    program: 'BEng Mechanical Engineering, UNSW',
-    quote: 'As a first-generation university student, I was nervous. riftApply\'s step-by-step guidance and 24/7 support gave me the confidence to apply and succeed.',
-    rating: 5,
-    img: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=120&auto=format&fit=crop&q=80',
-  },
-];
-
-const FAQS = [
-  {
-    q: 'Is it free to create an account and apply?',
-    a: 'Yes. Creating a student account and submitting applications through riftApply is completely free. There are no hidden fees or subscription charges for students.',
-  },
-  {
-    q: 'How long does the application process take?',
-    a: 'It depends on the university and program. Most applications receive a first decision within 2–8 weeks. We keep you updated at every stage so you\'re never left wondering.',
-  },
-  {
-    q: 'Do I need an agent, or can I apply directly?',
-    a: 'Both options are available. Students can apply directly through the platform or connect with a verified agent who can provide personalised guidance and increase your chances of acceptance.',
-  },
-  {
-    q: 'What documents do I need to apply?',
-    a: 'Typically: academic transcripts, a valid passport, English language test results (IELTS/TOEFL/PTE), a personal statement, and letters of recommendation. Requirements vary by program — the platform will show you exactly what each university needs.',
-  },
-  {
-    q: 'Can I apply to multiple universities at once?',
-    a: 'Absolutely. You can apply to as many universities as you like. Once your profile is complete, applying to additional programs takes just a few seconds.',
-  },
-  {
-    q: 'What countries and universities are available?',
-    a: 'We partner with 500+ universities across Canada, the UK, USA, Australia, Germany, UAE, and 25+ other countries. New institutions are added regularly.',
-  },
-  {
-    q: 'How do I track my application status?',
-    a: 'Your dashboard shows real-time status updates for every application — from "Submitted" to "Under Review" to "Decision Made". You\'ll also receive email and in-app notifications.',
-  },
-  {
-    q: 'What if my application is rejected?',
-    a: 'Our agents review rejected applications and advise on alternative programs or next steps such as conditional offers, foundation courses, or re-application strategies.',
-  },
-];
-
-const FOOTER_LINKS = {
-  'Quick Links': [
-    { label: 'Home', href: '#home' },
-    { label: 'About Us', href: '#about' },
-    { label: 'Destinations', href: '#destinations' },
-    { label: 'How It Works', href: '#how-it-works' },
-    { label: 'FAQ', href: '#faq' },
-  ],
-  'For Students': [
-    { label: 'Student Login', href: '/login' },
-    { label: 'Create Account', href: '/register' },
-    { label: 'Browse Universities', href: '/login' },
-    { label: 'Scholarship Guide', href: '#' },
-    { label: 'Visa Support', href: '#' },
-  ],
-  'For Partners': [
-    { label: 'University Portal', href: '/login' },
-    { label: 'Become an Agent', href: '/register' },
-    { label: 'Partner With Us', href: '#' },
-    { label: 'Agent Resources', href: '#' },
-  ],
-};
 
 /* ─────────────────────────────── main ─────────────────────────────── */
 export default function HomePage() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const { T, t, lang } = useT();
+  const [menuOpen, setMenuOpen]   = useState(false);
+  const [scrolled, setScrolled]   = useState(false);
+  const [openFaq, setOpenFaq]     = useState<number | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -159,15 +40,84 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  /* ── translated arrays ── */
+  const NAV_LINKS = [
+    { label: T(t.nav.home),        href: '#home' },
+    { label: T(t.nav.about),       href: '#about' },
+    { label: T(t.nav.destinations),href: '#destinations' },
+    { label: T(t.nav.howItWorks),  href: '#how-it-works' },
+    { label: T(t.nav.faq),         href: '#faq' },
+  ];
+
+  const STATS = [
+    { value: '500+',  label: T(t.stats.partnerUniversities), icon: <BookOpen size={22} /> },
+    { value: '50 K+', label: T(t.stats.studentsAdmitted),    icon: <Users size={22} /> },
+    { value: '30+',   label: T(t.stats.countriesServed),     icon: <Globe size={22} /> },
+    { value: '98 %',  label: T(t.stats.successRate),         icon: <TrendingUp size={22} /> },
+  ];
+
+  const STEPS = [
+    { step: '01', icon: <Users size={26} className="text-[#1a3a6b]" />,       title: T(t.howItWorks.step1Title), desc: T(t.howItWorks.step1Desc) },
+    { step: '02', icon: <FileText size={26} className="text-[#1a3a6b]" />,    title: T(t.howItWorks.step2Title), desc: T(t.howItWorks.step2Desc) },
+    { step: '03', icon: <Search size={26} className="text-[#1a3a6b]" />,      title: T(t.howItWorks.step3Title), desc: T(t.howItWorks.step3Desc) },
+    { step: '04', icon: <CheckCircle size={26} className="text-[#1a3a6b]" />, title: T(t.howItWorks.step4Title), desc: T(t.howItWorks.step4Desc) },
+  ];
+
+  const FAQS = [
+    { q: T(t.faq.q1), a: T(t.faq.a1) },
+    { q: T(t.faq.q2), a: T(t.faq.a2) },
+    { q: T(t.faq.q3), a: T(t.faq.a3) },
+    { q: T(t.faq.q4), a: T(t.faq.a4) },
+    { q: T(t.faq.q5), a: T(t.faq.a5) },
+    { q: T(t.faq.q6), a: T(t.faq.a6) },
+    { q: T(t.faq.q7), a: T(t.faq.a7) },
+    { q: T(t.faq.q8), a: T(t.faq.a8) },
+  ];
+
+  const FOOTER_LINKS = {
+    [T(t.footer.quickLinks)]: [
+      { label: T(t.footer.homeLink),         href: '#home' },
+      { label: T(t.nav.about),               href: '#about' },
+      { label: T(t.nav.destinations),        href: '#destinations' },
+      { label: T(t.nav.howItWorks),          href: '#how-it-works' },
+      { label: T(t.nav.faq),                 href: '#faq' },
+    ],
+    [T(t.footer.forStudents)]: [
+      { label: T(t.footer.studentLogin),     href: '/login' },
+      { label: T(t.footer.createAccount),    href: '/register' },
+      { label: T(t.footer.browseUniversities),href: '/login' },
+      { label: T(t.footer.scholarshipGuide), href: '#' },
+      { label: T(t.footer.visaSupport),      href: '#' },
+    ],
+    [T(t.footer.forPartners)]: [
+      { label: T(t.footer.universityPortal), href: '/login' },
+      { label: T(t.footer.becomeAgent),      href: '/register' },
+      { label: T(t.footer.partnerWithUs),    href: '#' },
+      { label: T(t.footer.agentResources),   href: '#' },
+    ],
+  };
+
+  const ABOUT_FEATURES = [
+    { icon: <Award size={18} className="text-[#f59e0b]" />,     text: T(t.about.feature1) },
+    { icon: <Shield size={18} className="text-[#f59e0b]" />,    text: T(t.about.feature2) },
+    { icon: <Headphones size={18} className="text-[#f59e0b]" />,text: T(t.about.feature3) },
+    { icon: <TrendingUp size={18} className="text-[#f59e0b]" />,text: T(t.about.feature4) },
+  ];
+
+  const TRUST_BADGES = [
+    { icon: <CheckCircle size={15} className="text-green-400" />, text: T(t.hero.trust1) },
+    { icon: <Shield size={15} className="text-blue-400" />,       text: T(t.hero.trust2) },
+    { icon: <Clock size={15} className="text-yellow-400" />,      text: T(t.hero.trust3) },
+  ];
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
 
       {/* ══════════════════ NAVBAR ══════════════════ */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || menuOpen
-            ? 'bg-white shadow-lg'
-            : 'bg-transparent'
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled || menuOpen ? 'bg-white shadow-lg' : 'bg-transparent'
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-18">
@@ -187,8 +137,9 @@ export default function HomePage() {
                 <a
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors hover:text-[#3b82f6] ${scrolled ? 'text-gray-600' : 'text-white/90'
-                    }`}
+                  className={`text-sm font-medium transition-colors hover:text-[#3b82f6] ${
+                    scrolled ? 'text-gray-600' : 'text-white/90'
+                  }`}
                 >
                   {link.label}
                 </a>
@@ -197,31 +148,34 @@ export default function HomePage() {
 
             {/* Desktop CTA */}
             <div className="hidden md:flex items-center gap-3">
+              <LanguageToggle />
               <Link
                 href="/login"
-                className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${scrolled
-                    ? 'text-gray-700 hover:bg-gray-100'
-                    : 'text-white hover:bg-white/10'
-                  }`}
+                className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
+                  scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+                }`}
               >
-                Sign In
+                {T(t.nav.signIn)}
               </Link>
               <Link
                 href="/register"
                 className="text-sm font-semibold px-5 py-2 bg-[#f59e0b] hover:bg-[#d97706] text-white rounded-lg transition-colors shadow-md"
               >
-                Apply Now
+                {T(t.nav.applyNow)}
               </Link>
             </div>
 
             {/* Mobile hamburger */}
-            <button
-              className={`md:hidden p-2 rounded-lg transition-colors ${scrolled || menuOpen ? 'text-gray-700' : 'text-white'}`}
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Toggle menu"
-            >
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+            <div className="flex items-center gap-2 md:hidden">
+              <LanguageToggle />
+              <button
+                className={`p-2 rounded-lg transition-colors ${scrolled || menuOpen ? 'text-gray-700' : 'text-white'}`}
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label="Toggle menu"
+              >
+                {menuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -245,14 +199,14 @@ export default function HomePage() {
                   className="flex-1 text-center text-sm font-medium px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Sign In
+                  {T(t.nav.signIn)}
                 </Link>
                 <Link
                   href="/register"
                   className="flex-1 text-center text-sm font-semibold px-4 py-2.5 bg-[#1a3a6b] text-white rounded-lg hover:bg-[#163060]"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Apply Now
+                  {T(t.nav.applyNow)}
                 </Link>
               </div>
             </div>
@@ -285,20 +239,19 @@ export default function HomePage() {
             <div className="text-white">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium text-blue-200 mb-6">
                 <Globe size={14} className="text-[#f59e0b]" />
-                Trusted by 50,000+ students across 30+ countries
+                {T(t.hero.badge)}
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-5 tracking-tight">
-                Your Dream
+                {T(t.hero.title1)}
                 <br />
-                <span className="text-[#f59e0b]">University,</span>
+                <span className="text-[#f59e0b]">{T(t.hero.title2)}</span>
                 <br />
-                Made Possible
+                {T(t.hero.title3)}
               </h1>
 
               <p className="text-blue-100 text-lg leading-relaxed mb-8 max-w-lg">
-                Apply to top-ranked universities in Canada, UK, USA, Australia and 25+ countries.
-                Expert agents, one platform, zero confusion.
+                {T(t.hero.subtitle)}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-10">
@@ -306,24 +259,20 @@ export default function HomePage() {
                   href="/register"
                   className="inline-flex items-center justify-center gap-2 bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold px-7 py-3.5 rounded-xl shadow-xl transition-all hover:scale-105 text-base"
                 >
-                  Start Your Application
+                  {T(t.hero.cta1)}
                   <ArrowRight size={18} />
                 </Link>
                 <a
                   href="#destinations"
                   className="inline-flex items-center justify-center gap-2 border-2 border-white/30 hover:border-white/60 text-white font-semibold px-7 py-3.5 rounded-xl transition-all text-base"
                 >
-                  Explore Universities
+                  {T(t.hero.cta2)}
                 </a>
               </div>
 
               {/* Trust badges */}
               <div className="flex flex-wrap gap-4 text-sm text-blue-200">
-                {[
-                  { icon: <CheckCircle size={15} className="text-green-400" />, text: 'Free to apply' },
-                  { icon: <Shield size={15} className="text-blue-400" />, text: 'Verified agents' },
-                  { icon: <Clock size={15} className="text-yellow-400" />, text: '24/7 support' },
-                ].map((b) => (
+                {TRUST_BADGES.map((b) => (
                   <div key={b.text} className="flex items-center gap-1.5">
                     {b.icon}
                     <span>{b.text}</span>
@@ -369,15 +318,15 @@ export default function HomePage() {
                   <CheckCircle size={20} className="text-green-600" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-gray-900">Offer Received!</div>
-                  <div className="text-xs text-gray-500">University of Toronto</div>
+                  <div className="text-sm font-bold text-gray-900">{T(t.hero.offerReceived)}</div>
+                  <div className="text-xs text-gray-500">{T(t.hero.floatUniversity)}</div>
                 </div>
               </div>
 
               {/* Floating country count */}
               <div className="absolute -right-4 top-6 bg-[#1a3a6b] text-white rounded-xl shadow-2xl px-4 py-3">
                 <div className="text-2xl font-extrabold">30+</div>
-                <div className="text-xs text-blue-200 font-medium">Countries</div>
+                <div className="text-xs text-blue-200 font-medium">{T(t.hero.countries)}</div>
               </div>
             </div>
           </div>
@@ -414,59 +363,42 @@ export default function HomePage() {
             {/* Images */}
             <div className="relative">
               <div className="grid grid-cols-2 gap-4">
-                <img
-                  src="https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=400&auto=format&fit=crop&q=80"
+                <img src="https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=400&auto=format&fit=crop&q=80"
                   alt="Diverse group of students with school bags on campus"
-                  className="w-full h-52 object-cover rounded-2xl shadow-lg"
-                  loading="lazy"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=400&auto=format&fit=crop&q=80"
+                  className="w-full h-52 object-cover rounded-2xl shadow-lg" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=400&auto=format&fit=crop&q=80"
                   alt="Student holding admission letter with joy"
-                  className="w-full h-52 object-cover rounded-2xl shadow-lg mt-8"
-                  loading="lazy"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=400&auto=format&fit=crop&q=80"
+                  className="w-full h-52 object-cover rounded-2xl shadow-lg mt-8" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=400&auto=format&fit=crop&q=80"
                   alt="Students studying in a modern library"
-                  className="w-full h-44 object-cover rounded-2xl shadow-lg"
-                  loading="lazy"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80"
+                  className="w-full h-44 object-cover rounded-2xl shadow-lg" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80"
                   alt="International student with backpack smiling"
-                  className="w-full h-44 object-cover rounded-2xl shadow-lg mt-4"
-                  loading="lazy"
-                />
+                  className="w-full h-44 object-cover rounded-2xl shadow-lg mt-4" loading="lazy" />
               </div>
               {/* Accent badge */}
               <div className="absolute -bottom-4 -right-4 bg-[#f59e0b] text-white rounded-2xl px-5 py-3 shadow-xl hidden md:block">
                 <div className="text-2xl font-extrabold">10+</div>
-                <div className="text-xs font-medium opacity-90">Years of experience</div>
+                <div className="text-xs font-medium opacity-90">{T(t.about.yearsExp)}</div>
               </div>
             </div>
 
             {/* Copy */}
             <div>
               <span className="inline-block text-[#1a3a6b] font-semibold text-sm uppercase tracking-widest mb-3">
-                About riftApply
+                {T(t.about.sectionTag)}
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-5 leading-tight">
-                Connecting Ambitious Students<br />to World-Class Education
+                {T(t.about.title)}
               </h2>
               <p className="text-gray-600 text-base leading-relaxed mb-5">
-                riftApply is a next-generation university admissions platform built to remove barriers between talented students and the world's best institutions. Whether you are applying from Nigeria, India, Pakistan, Senegal, or anywhere else — we are your bridge.
+                {T(t.about.desc1)}
               </p>
               <p className="text-gray-600 text-base leading-relaxed mb-7">
-                We partner with over 500 universities across 30+ countries and work with a network of verified agents who provide expert, personalised guidance from first inquiry all the way to arrival on campus.
+                {T(t.about.desc2)}
               </p>
               <div className="grid grid-cols-2 gap-4 mb-8">
-                {[
-                  { icon: <Award size={18} className="text-[#f59e0b]" />, text: 'Accredited institutions only' },
-                  { icon: <Shield size={18} className="text-[#f59e0b]" />, text: 'Verified agent network' },
-                  { icon: <Headphones size={18} className="text-[#f59e0b]" />, text: '24/7 student support' },
-                  { icon: <TrendingUp size={18} className="text-[#f59e0b]" />, text: '98% application success' },
-                ].map((item) => (
+                {ABOUT_FEATURES.map((item) => (
                   <div key={item.text} className="flex items-center gap-2.5 text-sm text-gray-700 font-medium">
                     {item.icon}
                     {item.text}
@@ -477,7 +409,7 @@ export default function HomePage() {
                 href="/register"
                 className="inline-flex items-center gap-2 bg-[#1a3a6b] hover:bg-[#163060] text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-md"
               >
-                Start Your Journey <ArrowRight size={16} />
+                {T(t.about.startJourney)} <ArrowRight size={16} />
               </Link>
             </div>
           </div>
@@ -489,18 +421,18 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="inline-block text-[#1a3a6b] font-semibold text-sm uppercase tracking-widest mb-3">
-              Study Destinations
+              {T(t.destinations.sectionTag)}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-              Explore Top Study Destinations
+              {T(t.destinations.title)}
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto text-base">
-              From Canadian campuses to UK heritage universities — find the perfect country for your academic journey.
+              {T(t.destinations.subtitle)}
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {DESTINATIONS.map((d) => (
+            {DESTINATION_DATA.map((d) => (
               <div
                 key={d.name}
                 className={`group rounded-2xl border ${d.border} overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
@@ -518,14 +450,14 @@ export default function HomePage() {
                     <span className="text-3xl">{d.flag}</span>
                     <div>
                       <div className="font-bold text-gray-900 text-base">{d.name}</div>
-                      <div className="text-sm text-gray-500">{d.unis}</div>
+                      <div className="text-sm text-gray-500">{d.unis}+ {T(t.destinations.universities)}</div>
                     </div>
                   </div>
                   <Link
                     href="/login"
                     className="inline-flex items-center text-sm font-semibold text-[#1a3a6b] gap-1 hover:gap-2 transition-all"
                   >
-                    Browse programs <ArrowRight size={14} />
+                    {T(t.destinations.exploreBtn)} <ArrowRight size={14} />
                   </Link>
                 </div>
               </div>
@@ -543,13 +475,13 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <span className="inline-block text-[#f59e0b] font-semibold text-sm uppercase tracking-widest mb-3">
-              How It Works
+              {T(t.howItWorks.sectionTag)}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-              From Application to Acceptance
+              {T(t.howItWorks.title)}
             </h2>
             <p className="text-blue-200 max-w-xl mx-auto text-base">
-              Our streamlined 4-step process takes the stress out of international university applications.
+              {T(t.howItWorks.subtitle)}
             </p>
           </div>
 
@@ -560,7 +492,6 @@ export default function HomePage() {
                 {i < STEPS.length - 1 && (
                   <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-white/20 z-0" style={{ width: 'calc(100% - 4rem)', left: '4rem' }} />
                 )}
-
                 <div className="relative z-10 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-colors">
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
@@ -580,7 +511,7 @@ export default function HomePage() {
               href="/register"
               className="inline-flex items-center gap-2 bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold px-8 py-4 rounded-xl shadow-xl transition-all hover:scale-105 text-base"
             >
-              Begin My Application <ArrowRight size={18} />
+              {T(t.howItWorks.beginApp)} <ArrowRight size={18} />
             </Link>
           </div>
         </div>
@@ -591,39 +522,39 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="inline-block text-[#1a3a6b] font-semibold text-sm uppercase tracking-widest mb-3">
-              Student Stories
+              {T(t.testimonials.sectionTag)}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-              Real Students. Real Results.
+              {T(t.testimonials.title)}
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto text-base">
-              Join thousands of students who turned their international education dreams into reality with riftApply.
+              {T(t.testimonials.subtitle)}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow border border-gray-100">
+            {TESTIMONIAL_DATA.map((item) => (
+              <div key={item.name} className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow border border-gray-100">
                 {/* Stars */}
                 <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: t.rating }).map((_, i) => (
+                  {Array.from({ length: item.rating }).map((_, i) => (
                     <Star key={i} size={16} className="text-[#f59e0b] fill-[#f59e0b]" />
                   ))}
                 </div>
-                <p className="text-gray-700 text-sm leading-relaxed mb-5 italic">"{t.quote}"</p>
+                <p className="text-gray-700 text-sm leading-relaxed mb-5 italic">"{T(t.testimonials[item.quoteKey])}"</p>
                 <div className="flex items-center gap-3">
                   <img
-                    src={t.img}
-                    alt={`${t.name} — successful riftApply student`}
+                    src={item.img}
+                    alt={`${item.name} — successful riftApply student`}
                     className="w-11 h-11 rounded-full object-cover border-2 border-[#1a3a6b]/20"
                     loading="lazy"
                   />
                   <div>
-                    <div className="font-bold text-gray-900 text-sm">{t.name}</div>
+                    <div className="font-bold text-gray-900 text-sm">{item.name}</div>
                     <div className="text-xs text-[#1a3a6b] font-medium flex items-center gap-1">
-                      <MapPin size={11} /> {t.country}
+                      <MapPin size={11} /> {item.country}
                     </div>
-                    <div className="text-xs text-gray-400 mt-0.5">{t.program}</div>
+                    <div className="text-xs text-gray-400 mt-0.5">{item.program}</div>
                   </div>
                 </div>
               </div>
@@ -637,13 +568,13 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="inline-block text-[#1a3a6b] font-semibold text-sm uppercase tracking-widest mb-3">
-              FAQ
+              {T(t.faq.sectionTag)}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-              Frequently Asked Questions
+              {T(t.faq.title)}
             </h2>
             <p className="text-gray-500 text-base">
-              Everything you need to know before starting your application.
+              {T(t.faq.subtitle)}
             </p>
           </div>
 
@@ -651,8 +582,9 @@ export default function HomePage() {
             {FAQS.map((faq, i) => (
               <div
                 key={i}
-                className={`border rounded-xl overflow-hidden transition-all ${openFaq === i ? 'border-[#1a3a6b]/40 shadow-md' : 'border-gray-200'
-                  }`}
+                className={`border rounded-xl overflow-hidden transition-all ${
+                  openFaq === i ? 'border-[#1a3a6b]/40 shadow-md' : 'border-gray-200'
+                }`}
               >
                 <button
                   className="w-full flex items-center justify-between text-left px-5 py-4 bg-white hover:bg-gray-50 transition-colors"
@@ -684,23 +616,23 @@ export default function HomePage() {
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="text-5xl mb-4">🎓</div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-            Ready to Study Abroad?
+            {T(t.cta.title)}
           </h2>
           <p className="text-blue-200 text-base mb-8 max-w-lg mx-auto leading-relaxed">
-            Join over 50,000 students who found their perfect university through riftApply. Your academic future starts with one click.
+            {T(t.cta.subtitle)}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/register"
               className="inline-flex items-center justify-center gap-2 bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold px-8 py-4 rounded-xl shadow-xl transition-all hover:scale-105 text-base"
             >
-              Create Free Account <ArrowRight size={18} />
+              {T(t.cta.btn1)} <ArrowRight size={18} />
             </Link>
             <Link
               href="/login"
               className="inline-flex items-center justify-center gap-2 border-2 border-white/30 hover:border-white/60 text-white font-semibold px-8 py-4 rounded-xl transition-all text-base"
             >
-              Sign In
+              {T(t.cta.btn2)}
             </Link>
           </div>
         </div>
@@ -720,7 +652,7 @@ export default function HomePage() {
                 <span className="text-xl font-bold text-white">riftApply</span>
               </Link>
               <p className="text-sm leading-relaxed text-gray-400 mb-5 max-w-xs">
-                Connecting ambitious students to world-class universities across 30+ countries through our verified agent network and intuitive platform.
+                {T(t.footer.description)}
               </p>
               <div className="flex flex-col gap-2 text-sm">
                 <div className="flex items-center gap-2">
@@ -733,7 +665,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin size={14} className="text-[#f59e0b]" />
-                  <span>yaounde cameroun , montee centre etougebe</span>
+                  <span>{T(t.footer.address)}</span>
                 </div>
               </div>
             </div>
@@ -760,11 +692,11 @@ export default function HomePage() {
 
           {/* Bottom bar */}
           <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} riftApply. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} riftApply. {T(t.footer.rights)}</p>
             <div className="flex gap-5">
-              <Link href="/privacy-policy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
-              <Link href="/terms-of-service" className="hover:text-gray-300 transition-colors">Terms of Service</Link>
-              <a href="#" className="hover:text-gray-300 transition-colors">Cookie Policy</a>
+              <Link href="/privacy-policy" className="hover:text-gray-300 transition-colors">{T(t.common.privacy)}</Link>
+              <Link href="/terms-of-service" className="hover:text-gray-300 transition-colors">{T(t.common.terms)}</Link>
+              <a href="#" className="hover:text-gray-300 transition-colors">{T(t.footer.cookiePolicy)}</a>
             </div>
           </div>
         </div>

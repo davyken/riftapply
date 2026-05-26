@@ -2,42 +2,45 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { GraduationCap, User, Briefcase, Building2, ArrowRight, ArrowLeft } from 'lucide-react';
-
-const roles = [
-  {
-    key: 'student',
-    label: 'Student',
-    description: 'Apply to universities, track your applications, and manage your documents.',
-    icon: <User size={28} />,
-    color: 'bg-blue-50 text-blue-600',
-    border: 'hover:border-blue-400',
-    href: '/register/student',
-    badge: null,
-  },
-  {
-    key: 'agent',
-    label: 'Agent',
-    description: 'Represent students or companies. Submit and manage applications on their behalf.',
-    icon: <Briefcase size={28} />,
-    color: 'bg-purple-50 text-purple-600',
-    border: 'hover:border-purple-400',
-    href: '/register/agent',
-    badge: { text: 'Requires admin approval · 15–30 min', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  },
-  {
-    key: 'university',
-    label: 'University',
-    description: 'List your programs, manage applications, and recruit top international talent.',
-    icon: <Building2 size={28} />,
-    color: 'bg-green-50 text-green-600',
-    border: 'hover:border-green-400',
-    href: '/register/university',
-    badge: { text: 'Admin approval (15–30 min) · then complete your profile', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  },
-];
+import { useT } from '@/lib/i18n/useT';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 
 export default function RegisterRolePage() {
   const router = useRouter();
+  const { T, t } = useT();
+
+  const roles = [
+    {
+      key: 'student',
+      label: T(t.register.studentTitle),
+      description: T(t.register.studentDesc),
+      icon: <User size={28} />,
+      color: 'bg-blue-50 text-blue-600',
+      border: 'hover:border-blue-400',
+      href: '/register/student',
+      badge: null,
+    },
+    {
+      key: 'agent',
+      label: T(t.register.agentTitle),
+      description: T(t.register.agentDesc),
+      icon: <Briefcase size={28} />,
+      color: 'bg-purple-50 text-purple-600',
+      border: 'hover:border-purple-400',
+      href: '/register/agent',
+      badge: { text: T(t.register.agentBadge), color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+    },
+    {
+      key: 'university',
+      label: T(t.register.universityTitle),
+      description: T(t.register.universityDesc),
+      icon: <Building2 size={28} />,
+      color: 'bg-green-50 text-green-600',
+      border: 'hover:border-green-400',
+      href: '/register/university',
+      badge: { text: T(t.register.universityBadge), color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+    },
+  ];
 
   return (
     <div className="min-h-screen flex">
@@ -59,13 +62,13 @@ export default function RegisterRolePage() {
         </div>
         <div className="relative">
           <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-            Begin your<br />admissions journey.
+            {T(t.register.leftTitle)}
           </h1>
           <p className="text-blue-200 text-base leading-relaxed max-w-sm">
-            Choose how you'd like to participate — as a student, an agent, or a university.
+            {T(t.register.leftSubtitle)}
           </p>
           <div className="mt-8 space-y-3">
-            {['Free to join — no credit card', 'Secure document handling', 'Real-time application tracking'].map((item) => (
+            {[T(t.register.leftFeature1), T(t.register.leftFeature2), T(t.register.leftFeature3)].map((item) => (
               <div key={item} className="flex items-center gap-3 text-blue-100 text-sm">
                 <div className="w-5 h-5 rounded-full bg-blue-400/30 flex items-center justify-center flex-shrink-0">
                   <div className="w-2 h-2 rounded-full bg-blue-300" />
@@ -76,8 +79,8 @@ export default function RegisterRolePage() {
           </div>
         </div>
         <div className="relative bg-white/10 rounded-xl p-5 border border-white/10">
-          <p className="text-blue-100 text-sm italic">"riftApply simplified our entire international recruitment pipeline."</p>
-          <p className="text-blue-300 text-xs mt-2 font-medium">— International Office, European Business School</p>
+          <p className="text-blue-100 text-sm italic">{T(t.register.leftTestimonial)}</p>
+          <p className="text-blue-300 text-xs mt-2 font-medium">{T(t.register.leftTestimonialAuthor)}</p>
         </div>
       </div>
 
@@ -92,12 +95,15 @@ export default function RegisterRolePage() {
             <span className="text-xl font-bold text-[#1a3a6b]">riftApply</span>
           </div>
 
-          <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition-colors">
-            <ArrowLeft size={16} /> Back to Home
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+              <ArrowLeft size={16} /> {T(t.nav.backToHome)}
+            </Link>
+            <LanguageToggle />
+          </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Create your account</h2>
-          <p className="text-sm text-gray-500 mb-8">Select how you'd like to use riftApply.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">{T(t.register.title)}</h2>
+          <p className="text-sm text-gray-500 mb-8">{T(t.register.subtitle)}</p>
 
           <div className="space-y-3">
             {roles.map((role) => (
@@ -124,14 +130,14 @@ export default function RegisterRolePage() {
           </div>
 
           <p className="text-center text-sm text-gray-500 mt-8">
-            Already have an account?{' '}
-            <a href="/login" className="text-blue-600 font-medium hover:underline">Sign in</a>
+            {T(t.register.alreadyHave)}{' '}
+            <a href="/login" className="text-blue-600 font-medium hover:underline">{T(t.register.signIn)}</a>
           </p>
 
           <div className="flex justify-center gap-4 mt-4 text-xs text-gray-400">
-            <a href="/privacy-policy" className="hover:text-gray-600">Privacy Policy</a>
-            <a href="/terms-of-service" className="hover:text-gray-600">Terms of Service</a>
-            <a href="/help" className="hover:text-gray-600">Help Center</a>
+            <a href="/privacy-policy" className="hover:text-gray-600">{T(t.common.privacy)}</a>
+            <a href="/terms-of-service" className="hover:text-gray-600">{T(t.common.terms)}</a>
+            <a href="/help" className="hover:text-gray-600">{T(t.common.help)}</a>
           </div>
         </div>
       </div>

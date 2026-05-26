@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/auth.store';
 import { useSidebarStore } from '@/lib/store/sidebar.store';
 import { useNotificationStore } from '@/lib/store/notifications.store';
+import LanguageToggle from '@/components/ui/LanguageToggle';
+import { useT } from '@/lib/i18n/useT';
 
 /* Messages page per role */
 const MESSAGES_HREF: Record<string, string> = {
@@ -28,6 +30,7 @@ export default function Topbar() {
   const { toggle, toggleMobile } = useSidebarStore();
   const { unreadCount, fetchCount } = useNotificationStore();
 
+  const { T } = useT();
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
@@ -83,6 +86,9 @@ export default function Topbar() {
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      {/* Language toggle */}
+      <LanguageToggle />
 
       <div className="flex items-center gap-1">
         {/* Notification bell */}

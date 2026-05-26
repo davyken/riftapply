@@ -3,21 +3,24 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { GraduationCap, KeyRound, ArrowLeft, CheckCircle } from 'lucide-react';
 import { authApi } from '@/lib/api/auth.api';
+import { useT } from '@/lib/i18n/useT';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 
 type Role = 'student' | 'agent' | 'university' | 'admin';
 
-const ROLE_LABELS: Record<Role, string> = {
-  student:    'Student',
-  agent:      'Agent',
-  university: 'University',
-  admin:      'Admin',
-};
-
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const { T, t } = useT();
 
-  const [role, setRole]   = useState<Role>('student');
-  const [email, setEmail] = useState('');
+  const ROLE_LABELS: Record<Role, string> = {
+    student:    T(t.login.roles.student),
+    agent:      T(t.login.roles.agent),
+    university: T(t.login.roles.university),
+    admin:      T(t.login.roles.admin),
+  };
+
+  const [role, setRole]     = useState<Role>('student');
+  const [email, setEmail]   = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState('');
   const [sent, setSent]     = useState(false);
@@ -40,28 +43,29 @@ export default function ForgotPasswordPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white px-6">
         <div className="w-full max-w-md text-center">
+          <div className="flex justify-end mb-4">
+            <LanguageToggle />
+          </div>
           <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-green-200">
             <CheckCircle size={32} className="text-green-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Check Your Inbox</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{T(t.forgotPassword.sentTitle)}</h2>
           <p className="text-sm text-gray-500 leading-relaxed mb-6">
-            If an account with <strong className="text-gray-800">{email}</strong> exists, we've sent a 6-digit reset code to that address.
+            {T(t.forgotPassword.sentMsg)}{' '}
+            <strong className="text-gray-800">{email}</strong>{' '}
+            {T(t.forgotPassword.sentMsg2)}
           </p>
           <button
-            onClick={() =>
-              router.push(
-                `/reset-password?email=${encodeURIComponent(email)}&role=${role}`,
-              )
-            }
+            onClick={() => router.push(`/reset-password?email=${encodeURIComponent(email)}&role=${role}`)}
             className="w-full bg-[#1a3a6b] hover:bg-[#163060] text-white font-semibold py-3 rounded-lg text-sm transition-colors mb-3"
           >
-            Enter Reset Code
+            {T(t.forgotPassword.enterCode)}
           </button>
           <button
             onClick={() => { setSent(false); setEmail(''); }}
             className="text-sm text-blue-600 hover:underline"
           >
-            Try a different email
+            {T(t.forgotPassword.tryDifferent)}
           </button>
         </div>
       </div>
@@ -88,30 +92,31 @@ export default function ForgotPasswordPage() {
           <div className="w-16 h-16 bg-blue-400/20 rounded-2xl flex items-center justify-center mb-6">
             <KeyRound size={32} className="text-blue-300" />
           </div>
-          <h1 className="text-3xl font-bold text-white leading-tight mb-3">Forgot Your Password?</h1>
+          <h1 className="text-3xl font-bold text-white leading-tight mb-3">{T(t.forgotPassword.heroTitle)}</h1>
           <p className="text-blue-200 text-sm leading-relaxed max-w-xs">
-            No worries! Enter your email and we'll send you a code to reset your password securely.
+            {T(t.forgotPassword.heroSubtitle)}
           </p>
         </div>
         <p className="relative text-blue-400 text-xs">
-          Remembered it?{' '}
-          <a href="/login" className="text-white underline">Sign in</a>
+          {T(t.forgotPassword.remembered)}{' '}
+          <a href="/login" className="text-white underline">{T(t.nav.signIn)}</a>
         </p>
       </div>
 
       {/* Right panel */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 bg-white">
         <div className="w-full max-w-sm">
-          <button
-            onClick={() => router.push('/login')}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-8 transition-colors"
-          >
-            <ArrowLeft size={16} /> Back to Login
-          </button>
+          <div className="flex items-center justify-between mb-8">
+            <button onClick={() => router.push('/login')}
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+              <ArrowLeft size={16} /> {T(t.common.backToLogin)}
+            </button>
+            <LanguageToggle />
+          </div>
 
           <div className="mb-7">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Reset Password</h2>
-            <p className="text-sm text-gray-500">Enter your email and we'll send you a reset code.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">{T(t.forgotPassword.title)}</h2>
+            <p className="text-sm text-gray-500">{T(t.forgotPassword.subtitle)}</p>
           </div>
 
           {/* Role tabs */}
@@ -122,9 +127,7 @@ export default function ForgotPasswordPage() {
                 type="button"
                 onClick={() => { setRole(r); setError(''); }}
                 className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${
-                  role === r
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                  role === r ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 {ROLE_LABELS[r]}
@@ -134,9 +137,7 @@ export default function ForgotPasswordPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{T(t.common.email)}</label>
               <input
                 type="email"
                 required
@@ -158,13 +159,13 @@ export default function ForgotPasswordPage() {
               disabled={loading}
               className="w-full bg-[#1a3a6b] hover:bg-[#163060] disabled:opacity-60 text-white font-semibold py-3 rounded-lg text-sm transition-colors"
             >
-              {loading ? 'Sending…' : 'Send Reset Code'}
+              {loading ? T(t.forgotPassword.sending) : T(t.forgotPassword.sendBtn)}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Back to{' '}
-            <a href="/login" className="text-blue-600 font-medium hover:underline">Sign in</a>
+            {T(t.forgotPassword.backToSignIn)}{' '}
+            <a href="/login" className="text-blue-600 font-medium hover:underline">{T(t.nav.signIn)}</a>
           </p>
         </div>
       </div>

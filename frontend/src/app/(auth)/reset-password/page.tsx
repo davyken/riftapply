@@ -3,10 +3,13 @@ import { useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { GraduationCap, KeyRound, ArrowLeft, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { authApi } from '@/lib/api/auth.api';
+import { useT } from '@/lib/i18n/useT';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 
 function ResetPasswordContent() {
   const router  = useRouter();
   const params  = useSearchParams();
+  const { T, t } = useT();
 
   const email = params.get('email') || '';
   const role  = params.get('role')  || 'student';
@@ -66,18 +69,21 @@ function ResetPasswordContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white px-6">
         <div className="w-full max-w-md text-center">
+          <div className="flex justify-end mb-4">
+            <LanguageToggle />
+          </div>
           <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-green-200">
             <CheckCircle size={32} className="text-green-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Password Reset!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{T(t.resetPassword.doneTitle)}</h2>
           <p className="text-sm text-gray-500 leading-relaxed mb-6">
-            Your password has been updated successfully. You can now sign in with your new password.
+            {T(t.resetPassword.doneMsg)}
           </p>
           <button
             onClick={() => router.push('/login')}
             className="w-full bg-[#1a3a6b] hover:bg-[#163060] text-white font-semibold py-3 rounded-lg text-sm transition-colors"
           >
-            Go to Sign In
+            {T(t.resetPassword.goToSignIn)}
           </button>
         </div>
       </div>
@@ -104,31 +110,34 @@ function ResetPasswordContent() {
           <div className="w-16 h-16 bg-blue-400/20 rounded-2xl flex items-center justify-center mb-6">
             <KeyRound size={32} className="text-blue-300" />
           </div>
-          <h1 className="text-3xl font-bold text-white leading-tight mb-3">Set New Password</h1>
+          <h1 className="text-3xl font-bold text-white leading-tight mb-3">{T(t.resetPassword.heroTitle)}</h1>
           <p className="text-blue-200 text-sm leading-relaxed max-w-xs">
-            Enter the 6-digit code from your email and choose a strong new password.
+            {T(t.resetPassword.heroSubtitle)}
           </p>
         </div>
         <p className="relative text-blue-400 text-xs">
-          Remembered it?{' '}
-          <a href="/login" className="text-white underline">Sign in</a>
+          {T(t.forgotPassword.remembered)}{' '}
+          <a href="/login" className="text-white underline">{T(t.nav.signIn)}</a>
         </p>
       </div>
 
       {/* Right panel */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 bg-white">
         <div className="w-full max-w-md">
-          <button
-            onClick={() => router.push('/forgot-password')}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-8 transition-colors"
-          >
-            <ArrowLeft size={16} /> Back
-          </button>
+          <div className="flex items-center justify-between mb-8">
+            <button onClick={() => router.push('/forgot-password')}
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+              <ArrowLeft size={16} /> {T(t.common.back)}
+            </button>
+            <LanguageToggle />
+          </div>
 
           <div className="mb-7">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Reset Your Password</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">{T(t.resetPassword.title)}</h2>
             <p className="text-sm text-gray-500">
-              Enter the code sent to <strong className="text-gray-700">{email}</strong> and your new password.
+              {T(t.resetPassword.subtitle)}{' '}
+              <strong className="text-gray-700">{email}</strong>{' '}
+              {T(t.resetPassword.subtitleAnd)}
             </p>
           </div>
 
@@ -136,7 +145,7 @@ function ResetPasswordContent() {
             {/* Code digits */}
             <div>
               <label className="block text-sm font-medium text-gray-700 text-center mb-3">
-                Enter your 6-digit reset code
+                {T(t.resetPassword.codeLabel)}
               </label>
               <div className="flex justify-center gap-3" onPaste={handlePaste}>
                 {digits.map((d, i) => (
@@ -150,9 +159,7 @@ function ResetPasswordContent() {
                     onChange={(e) => handleDigit(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
                     className={`w-12 h-14 text-center text-xl font-bold border-2 rounded-xl transition-all outline-none focus:ring-2 focus:ring-blue-500 ${
-                      d
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-300 bg-white text-gray-900'
+                      d ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-300 bg-white text-gray-900'
                     }`}
                   />
                 ))}
@@ -162,7 +169,7 @@ function ResetPasswordContent() {
             {/* New password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                New Password <span className="text-red-500">*</span>
+                {T(t.resetPassword.newPassword)} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -171,14 +178,11 @@ function ResetPasswordContent() {
                   minLength={6}
                   value={newPassword}
                   onChange={(e) => { setNewPw(e.target.value); setError(''); }}
-                  placeholder="Min. 6 characters"
+                  placeholder={T(t.registerStudent.minPassword)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
+                <button type="button" onClick={() => setShowPw(!showPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -187,14 +191,14 @@ function ResetPasswordContent() {
             {/* Confirm password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm New Password <span className="text-red-500">*</span>
+                {T(t.resetPassword.confirmPassword)} <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"
                 required
                 value={confirmPw}
                 onChange={(e) => { setConfirmPw(e.target.value); setError(''); }}
-                placeholder="Repeat your new password"
+                placeholder={T(t.resetPassword.confirmPlaceholder)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -205,19 +209,16 @@ function ResetPasswordContent() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#1a3a6b] hover:bg-[#163060] disabled:opacity-60 text-white font-semibold py-3 rounded-lg text-sm transition-colors"
-            >
-              {loading ? 'Resetting…' : 'Reset Password'}
+            <button type="submit" disabled={loading}
+              className="w-full bg-[#1a3a6b] hover:bg-[#163060] disabled:opacity-60 text-white font-semibold py-3 rounded-lg text-sm transition-colors">
+              {loading ? T(t.resetPassword.resetting) : T(t.resetPassword.resetBtn)}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Didn't receive a code?{' '}
-            <a href={`/forgot-password`} className="text-blue-600 font-medium hover:underline">
-              Request again
+            {T(t.resetPassword.dontHaveCode)}{' '}
+            <a href="/forgot-password" className="text-blue-600 font-medium hover:underline">
+              {T(t.resetPassword.requestAgain)}
             </a>
           </p>
         </div>

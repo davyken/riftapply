@@ -5,6 +5,8 @@ import { GraduationCap, Mail, ArrowLeft, RefreshCw, CheckCircle, Clock, AlertCir
 import { authApi } from '@/lib/api/auth.api';
 import { useAuthStore } from '@/lib/store/auth.store';
 import { UserRole } from '@/types';
+import { useT } from '@/lib/i18n/useT';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 
 const ROLE_REDIRECT: Record<string, string> = {
   student:    '/student',
@@ -19,6 +21,7 @@ function VerifyEmailContent() {
   const router  = useRouter();
   const params  = useSearchParams();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const { T, t } = useT();
 
   const email = params.get('email') || '';
   const role  = params.get('role')  || 'student';
@@ -35,14 +38,14 @@ function VerifyEmailContent() {
 
   useEffect(() => {
     if (expiryLeft <= 0) { setExpired(true); return; }
-    const t = setTimeout(() => setExpiryLeft((s) => s - 1), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setExpiryLeft((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
   }, [expiryLeft]);
 
-  const expiryMins = Math.floor(expiryLeft / 60);
-  const expirySecs = expiryLeft % 60;
+  const expiryMins    = Math.floor(expiryLeft / 60);
+  const expirySecs    = expiryLeft % 60;
   const expiryDisplay = `${expiryMins}:${String(expirySecs).padStart(2, '0')}`;
-  const expiryUrgent  = expiryLeft <= 60; // last minute → red
+  const expiryUrgent  = expiryLeft <= 60;
 
   // ── resend cooldown ─────────────────────────────────────────────
   const [resendCooldown, setResendCooldown] = useState(60);
@@ -50,8 +53,8 @@ function VerifyEmailContent() {
 
   useEffect(() => {
     if (resendCooldown <= 0) { setCanResend(true); return; }
-    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
   }, [resendCooldown]);
 
   const refs = useRef<Array<HTMLInputElement | null>>([]);
@@ -99,7 +102,6 @@ function VerifyEmailContent() {
       }
     } catch (err: any) {
       const msg: string = err?.response?.data?.message || 'Verification failed. Please try again.';
-      // Account was auto-deleted by MongoDB TTL
       if (msg.toLowerCase().includes('expired') || msg.toLowerCase().includes('register again')) {
         setExpired(true);
       } else {
@@ -117,7 +119,6 @@ function VerifyEmailContent() {
     try {
       await authApi.resendVerificationCode(email, role);
       setSuccess('A new code has been sent to your email.');
-      // Reset both countdowns
       setResendCooldown(60);
       setCanResend(false);
       setExpiryLeft(EXPIRY_SECONDS);
@@ -141,21 +142,22 @@ function VerifyEmailContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white px-6">
         <div className="w-full max-w-md text-center">
+          <div className="flex justify-end mb-4">
+            <LanguageToggle />
+          </div>
           <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-200">
             <AlertCircle size={32} className="text-red-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Expired</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{T(t.verifyEmail.expiredTitle)}</h2>
           <p className="text-sm text-gray-500 leading-relaxed mb-6">
-            You didn't verify your email within 5 minutes, so your account details have been deleted for security. Please register again — it only takes a moment.
+            {T(t.verifyEmail.expiredMsg)}
           </p>
-          <a
-            href="/register"
-            className="block w-full bg-[#1a3a6b] hover:bg-[#163060] text-white font-semibold py-3 rounded-lg text-sm transition-colors text-center"
-          >
-            Register Again
+          <a href="/register"
+            className="block w-full bg-[#1a3a6b] hover:bg-[#163060] text-white font-semibold py-3 rounded-lg text-sm transition-colors text-center">
+            {T(t.verifyEmail.registerAgainBtn)}
           </a>
           <a href="/login" className="inline-block mt-3 text-sm text-blue-600 hover:underline">
-            Already have an account? Sign in
+            {T(t.verifyEmail.alreadyHave)}
           </a>
         </div>
       </div>
@@ -183,15 +185,15 @@ function VerifyEmailContent() {
           <div className="w-16 h-16 bg-blue-400/20 rounded-2xl flex items-center justify-center mb-6">
             <Mail size={32} className="text-blue-300" />
           </div>
-          <h1 className="text-3xl font-bold text-white leading-tight mb-3">Check Your Inbox</h1>
+          <h1 className="text-3xl font-bold text-white leading-tight mb-3">{T(t.verifyEmail.heroTitle)}</h1>
           <p className="text-blue-200 text-sm leading-relaxed max-w-xs">
-            We sent a 6-digit verification code to your email. Enter it within 5 minutes to activate your account.
+            {T(t.verifyEmail.heroSubtitle)}
           </p>
           <ul className="mt-6 space-y-2">
             {[
-              'Code expires in 5 minutes',
-              'Check spam/junk if not found',
-              'Request a new code if expired',
+              T(t.verifyEmail.hints.h1),
+              T(t.verifyEmail.hints.h2),
+              T(t.verifyEmail.hints.h3),
             ].map((item) => (
               <li key={item} className="flex items-center gap-2 text-blue-200 text-sm">
                 <span className="text-green-400">✓</span> {item}
@@ -200,29 +202,30 @@ function VerifyEmailContent() {
           </ul>
         </div>
         <p className="relative text-blue-400 text-xs">
-          Wrong account?{' '}
-          <a href="/register" className="text-white underline">Register again</a>
+          {T(t.verifyEmail.wrongAccount)}{' '}
+          <a href="/register" className="text-white underline">{T(t.verifyEmail.registerAgain)}</a>
         </p>
       </div>
 
       {/* Right panel */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 bg-white">
         <div className="w-full max-w-md">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-8 transition-colors"
-          >
-            <ArrowLeft size={16} /> Back
-          </button>
+          <div className="flex items-center justify-between mb-8">
+            <button onClick={() => router.back()}
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+              <ArrowLeft size={16} /> {T(t.common.back)}
+            </button>
+            <LanguageToggle />
+          </div>
 
           <div className="flex flex-col items-center text-center mb-6">
             <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4 border border-blue-100">
               <Mail size={28} className="text-blue-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{T(t.verifyEmail.title)}</h2>
             <p className="text-sm text-gray-500 leading-relaxed">
-              We sent a 6-digit code to<br />
-              <span className="font-semibold text-gray-800">{email || 'your email'}</span>
+              {T(t.verifyEmail.sentTo)}<br />
+              <span className="font-semibold text-gray-800">{email || T(t.verifyEmail.yourEmail)}</span>
             </p>
           </div>
 
@@ -234,7 +237,7 @@ function VerifyEmailContent() {
           }`}>
             <Clock size={15} />
             <span className="text-sm font-medium">
-              {expiryUrgent ? 'Hurry! Code expires in ' : 'Code expires in '}
+              {expiryUrgent ? T(t.verifyEmail.hurry) : T(t.verifyEmail.codeExpires)}{' '}
               <span className="font-bold tabular-nums">{expiryDisplay}</span>
             </span>
           </div>
@@ -242,7 +245,7 @@ function VerifyEmailContent() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 text-center mb-3">
-                Enter your verification code
+                {T(t.verifyEmail.codeLabel)}
               </label>
               <div className="flex justify-center gap-3" onPaste={handlePaste}>
                 {digits.map((d, i) => (
@@ -256,9 +259,7 @@ function VerifyEmailContent() {
                     onChange={(e) => handleDigit(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
                     className={`w-12 h-14 text-center text-xl font-bold border-2 rounded-xl transition-all outline-none focus:ring-2 focus:ring-blue-500 ${
-                      d
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-300 bg-white text-gray-900'
+                      d ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-300 bg-white text-gray-900'
                     }`}
                   />
                 ))}
@@ -281,13 +282,13 @@ function VerifyEmailContent() {
               disabled={loading || digits.join('').length < 6}
               className="w-full bg-[#1a3a6b] hover:bg-[#163060] disabled:opacity-60 text-white font-semibold py-3 rounded-lg text-sm transition-colors"
             >
-              {loading ? 'Verifying…' : 'Verify Email'}
+              {loading ? T(t.verifyEmail.verifying) : T(t.verifyEmail.verifyBtn)}
             </button>
           </form>
 
           {/* Resend */}
           <div className="mt-5 text-center">
-            <p className="text-sm text-gray-500 mb-2">Didn't receive the code?</p>
+            <p className="text-sm text-gray-500 mb-2">{T(t.verifyEmail.didntReceive)}</p>
             {canResend ? (
               <button
                 onClick={handleResend}
@@ -295,11 +296,12 @@ function VerifyEmailContent() {
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-60"
               >
                 <RefreshCw size={14} className={resending ? 'animate-spin' : ''} />
-                {resending ? 'Sending…' : 'Resend Code'}
+                {resending ? T(t.verifyEmail.resending) : T(t.verifyEmail.resend)}
               </button>
             ) : (
               <p className="text-sm text-gray-400">
-                Resend available in <span className="font-semibold text-gray-600">{resendCooldown}s</span>
+                {T(t.verifyEmail.resendAvailable)}{' '}
+                <span className="font-semibold text-gray-600">{resendCooldown}s</span>
               </p>
             )}
           </div>
