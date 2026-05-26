@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -91,6 +92,7 @@ export default function Sidebar() {
   const { user, role, clearAuth } = useAuthStore();
   const { collapsed, toggle, mobileOpen, closeMobile } = useSidebarStore();
   const { unreadCount } = useNotificationStore();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const currentRole = (role || 'student') as UserRole;
   const navItems    = NAV_BY_ROLE[currentRole] || [];
@@ -193,7 +195,7 @@ export default function Sidebar() {
           <span className={collapsed ? 'md:hidden' : ''}>Help Center</span>
         </Link>
         <button
-          onClick={logout}
+          onClick={() => setShowLogoutModal(true)}
           title={collapsed ? 'Logout' : undefined}
           className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-blue-200 hover:bg-white/5 hover:text-white transition-colors
             ${collapsed ? 'md:px-0 md:py-2.5 md:justify-center px-3 py-2.5' : 'px-3 py-2.5'}`}
@@ -233,6 +235,31 @@ export default function Sidebar() {
       <div className={`hidden md:flex h-screen flex-shrink-0 transition-all duration-200 ${collapsed ? 'w-16' : 'w-[220px]'}`}>
         {sidebarContent}
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Confirm Logout</h3>
+            <p className="text-sm text-gray-500 mb-6">Are you sure you want to log out of your account?</p>
+            <div className="flex items-center gap-3 justify-end">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={logout}
+                className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

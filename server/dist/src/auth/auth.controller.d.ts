@@ -1,8 +1,13 @@
 import { AuthService } from './auth.service';
+import { Model } from 'mongoose';
 import { RegisterStudentDto, RegisterAgentDto, RegisterUniversityDto, LoginDto } from './dto/register.dto';
 export declare class AuthController {
     private authService;
-    constructor(authService: AuthService);
+    private userModel;
+    constructor(authService: AuthService, userModel: Model<any>);
+    seedAdmin(): Promise<{
+        message: string;
+    }>;
     registerStudent(dto: RegisterStudentDto, avatar?: Express.Multer.File): Promise<{
         token: string;
         user: any;

@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { GraduationCap, Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
+import { GraduationCap, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { authApi } from '@/lib/api/auth.api';
 import { useAuthStore } from '@/lib/store/auth.store';
 
@@ -30,6 +31,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -116,6 +118,10 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full max-w-sm">
+          <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition-colors">
+            <ArrowLeft size={16} /> Back to Home
+          </Link>
+
           <h2 className="text-2xl font-bold text-gray-900 text-center mb-1">Welcome Back</h2>
           <p className="text-sm text-gray-500 text-center mb-6">Please select your role and enter your details.</p>
 
@@ -188,6 +194,20 @@ export default function LoginPage() {
               <span className="text-sm text-gray-600">Stay signed in for 30 days</span>
             </label>
 
+            {/* Terms of Service */}
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                required
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-0.5"
+              />
+              <span className="text-sm text-gray-600">
+                I agree to the <a href="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</a> and <a href="/terms-of-service" className="text-blue-600 hover:underline">Terms of Service</a>
+              </span>
+            </label>
+
             {error && (
               <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {error}
@@ -240,9 +260,9 @@ export default function LoginPage() {
           )}
 
           <div className="flex justify-center gap-4 mt-6 text-xs text-gray-400">
-            <a href="#" className="hover:text-gray-600">Privacy Policy</a>
-            <a href="#" className="hover:text-gray-600">Terms of Service</a>
-            <a href="#" className="hover:text-gray-600">Help Center</a>
+            <a href="/privacy-policy" className="hover:text-gray-600">Privacy Policy</a>
+            <a href="/terms-of-service" className="hover:text-gray-600">Terms of Service</a>
+            <a href="/help" className="hover:text-gray-600">Help Center</a>
           </div>
         </div>
       </div>

@@ -278,6 +278,13 @@ export default function UniversityRegisterPage() {
               </div>
             </div>
 
+            <div className="flex items-center gap-2 mt-2">
+              <input type="checkbox" id="terms" required className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" />
+              <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer">
+                I accept the <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium hover:underline">Terms and Services</a>
+              </label>
+            </div>
+
             {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
 
             <button type="submit" disabled={loading}

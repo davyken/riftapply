@@ -34,6 +34,21 @@ async function bootstrap() {
     const port = process.env.PORT || 4000;
     await app.listen(port);
     console.log(`Server running on port ${port} [${process.env.NODE_ENV || 'development'}]`);
+    const serverUrl = process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || process.env.RAILWAY_STATIC_URL;
+    if (serverUrl) {
+        setInterval(() => {
+            fetch(`${serverUrl}/api/health`)
+                .then(() => console.log('Keep-alive ping successful'))
+                .catch((err) => console.error('Keep-alive ping failed:', err.message));
+        }, 5 * 60 * 1000);
+    }
+    else {
+        setInterval(() => {
+            fetch(`http://localhost:${port}/api/health`)
+                .then(() => console.log('Local keep-alive ping successful'))
+                .catch((err) => console.error('Local keep-alive ping failed:', err.message));
+        }, 5 * 60 * 1000);
+    }
 }
 process.on('unhandledRejection', (reason) => {
     console.error('Unhandled Rejection:', reason);

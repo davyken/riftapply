@@ -164,11 +164,10 @@ export default function HomePage() {
 
       {/* ══════════════════ NAVBAR ══════════════════ */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled || menuOpen
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || menuOpen
             ? 'bg-white shadow-lg'
             : 'bg-transparent'
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-18">
@@ -188,9 +187,8 @@ export default function HomePage() {
                 <a
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors hover:text-[#3b82f6] ${
-                    scrolled ? 'text-gray-600' : 'text-white/90'
-                  }`}
+                  className={`text-sm font-medium transition-colors hover:text-[#3b82f6] ${scrolled ? 'text-gray-600' : 'text-white/90'
+                    }`}
                 >
                   {link.label}
                 </a>
@@ -201,11 +199,10 @@ export default function HomePage() {
             <div className="hidden md:flex items-center gap-3">
               <Link
                 href="/login"
-                className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
-                  scrolled
+                className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${scrolled
                     ? 'text-gray-700 hover:bg-gray-100'
                     : 'text-white hover:bg-white/10'
-                }`}
+                  }`}
               >
                 Sign In
               </Link>
@@ -654,9 +651,8 @@ export default function HomePage() {
             {FAQS.map((faq, i) => (
               <div
                 key={i}
-                className={`border rounded-xl overflow-hidden transition-all ${
-                  openFaq === i ? 'border-[#1a3a6b]/40 shadow-md' : 'border-gray-200'
-                }`}
+                className={`border rounded-xl overflow-hidden transition-all ${openFaq === i ? 'border-[#1a3a6b]/40 shadow-md' : 'border-gray-200'
+                  }`}
               >
                 <button
                   className="w-full flex items-center justify-between text-left px-5 py-4 bg-white hover:bg-gray-50 transition-colors"
@@ -737,7 +733,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin size={14} className="text-[#f59e0b]" />
-                  <span>Toronto, ON · London, UK · Dubai, UAE</span>
+                  <span>yaounde cameroun , montee centre etougebe</span>
                 </div>
               </div>
             </div>
@@ -766,8 +762,8 @@ export default function HomePage() {
           <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
             <p>© {new Date().getFullYear()} riftApply. All rights reserved.</p>
             <div className="flex gap-5">
-              <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-gray-300 transition-colors">Terms of Service</a>
+              <Link href="/privacy-policy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
+              <Link href="/terms-of-service" className="hover:text-gray-300 transition-colors">Terms of Service</Link>
               <a href="#" className="hover:text-gray-300 transition-colors">Cookie Policy</a>
             </div>
           </div>

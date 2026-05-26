@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { GraduationCap, User, Briefcase, Building2, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { GraduationCap, User, Briefcase, Building2, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const roles = [
   {
@@ -91,6 +92,10 @@ export default function RegisterRolePage() {
             <span className="text-xl font-bold text-[#1a3a6b]">riftApply</span>
           </div>
 
+          <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition-colors">
+            <ArrowLeft size={16} /> Back to Home
+          </Link>
+
           <h2 className="text-2xl font-bold text-gray-900 mb-1">Create your account</h2>
           <p className="text-sm text-gray-500 mb-8">Select how you'd like to use riftApply.</p>
 
@@ -124,8 +129,9 @@ export default function RegisterRolePage() {
           </p>
 
           <div className="flex justify-center gap-4 mt-4 text-xs text-gray-400">
-            <a href="#" className="hover:text-gray-600">Privacy Policy</a>
-            <a href="#" className="hover:text-gray-600">Terms of Service</a>
+            <a href="/privacy-policy" className="hover:text-gray-600">Privacy Policy</a>
+            <a href="/terms-of-service" className="hover:text-gray-600">Terms of Service</a>
+            <a href="/help" className="hover:text-gray-600">Help Center</a>
           </div>
         </div>
       </div>
