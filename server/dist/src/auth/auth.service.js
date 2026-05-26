@@ -58,13 +58,12 @@ const otp_schema_1 = require("./schemas/otp.schema");
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 const mail_service_1 = require("../mail/mail.service");
 const enums_1 = require("../common/enums");
+const VERIFICATION_WINDOW_MS = 5 * 60 * 1000;
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 function otpExpiry() {
-    const d = new Date();
-    d.setMinutes(d.getMinutes() + 10);
-    return d;
+    return new Date(Date.now() + VERIFICATION_WINDOW_MS);
 }
 let AuthService = class AuthService {
     userModel;
@@ -101,6 +100,7 @@ let AuthService = class AuthService {
             role: enums_1.UserRole.STUDENT,
             status: enums_1.AccountStatus.ACTIVE,
             emailVerified: false,
+            verificationExpiry: otpExpiry(),
         });
         await this.sendOtp(dto.email.toLowerCase(), otp_schema_1.OtpType.EMAIL_VERIFICATION, 'student', dto.firstName);
         return {
@@ -132,6 +132,7 @@ let AuthService = class AuthService {
             avatar: avatarUrl,
             status: enums_1.AccountStatus.PENDING,
             emailVerified: false,
+            verificationExpiry: otpExpiry(),
         };
         if (dto.agentType === enums_1.AgentType.PERSONAL && files?.cniDocument?.[0]) {
             const result = await this.cloudinaryService.uploadFile(files.cniDocument[0], 'agents/cni');
@@ -160,6 +161,7 @@ let AuthService = class AuthService {
             password: hashed,
             status: enums_1.AccountStatus.PENDING,
             emailVerified: false,
+            verificationExpiry: otpExpiry(),
         };
         if (logo) {
             const result = await this.cloudinaryService.uploadFile(logo, 'universities/logos');
@@ -190,10 +192,12 @@ let AuthService = class AuthService {
         otp.used = true;
         await otp.save();
         const user = await this.findUserByEmailAndRole(normalizedEmail, role);
-        if (!user)
-            throw new common_1.NotFoundException('Account not found.');
+        if (!user) {
+            throw new common_1.BadRequestException('Your registration has expired. Please register again.');
+        }
         user.emailVerified = true;
         await user.save();
+        await this.unsetVerificationExpiry(normalizedEmail, role);
         if (role === 'student' || role === 'admin') {
             const token = this.signToken(String(user._id), normalizedEmail, role);
             return {
@@ -213,10 +217,12 @@ let AuthService = class AuthService {
     async resendVerificationCode(email, role) {
         const normalizedEmail = email.toLowerCase();
         const user = await this.findUserByEmailAndRole(normalizedEmail, role);
-        if (!user)
-            throw new common_1.NotFoundException('Account not found for this email and role.');
+        if (!user) {
+            throw new common_1.BadRequestException('Your registration has expired. Please register again.');
+        }
         if (user.emailVerified)
             throw new common_1.BadRequestException('Email is already verified.');
+        await this.extendVerificationExpiry(normalizedEmail, role);
         const name = user.firstName || user.name || normalizedEmail;
         await this.sendOtp(normalizedEmail, otp_schema_1.OtpType.EMAIL_VERIFICATION, role, name);
         return { message: 'A new verification code has been sent to your email.' };
@@ -299,6 +305,27 @@ let AuthService = class AuthService {
         else {
             await this.mailService.sendVerificationCode(email, code, name);
         }
+    }
+    async unsetVerificationExpiry(email, role) {
+        const model = this.getModelForRole(role);
+        if (model) {
+            await model.updateOne({ email }, { $unset: { verificationExpiry: '' } });
+        }
+    }
+    async extendVerificationExpiry(email, role) {
+        const model = this.getModelForRole(role);
+        if (model) {
+            await model.updateOne({ email }, { verificationExpiry: otpExpiry() });
+        }
+    }
+    getModelForRole(role) {
+        if (role === 'student' || role === 'admin')
+            return this.userModel;
+        if (role === 'agent')
+            return this.agentModel;
+        if (role === 'university')
+            return this.universityModel;
+        return null;
     }
     async findUserByEmailAndRole(email, role) {
         if (role === 'student' || role === 'admin') {

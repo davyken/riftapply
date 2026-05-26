@@ -58,6 +58,17 @@ export class Agent {
 
   @Prop({ default: false })
   emailVerified: boolean;
+
+  /**
+   * Set to `now + 5 minutes` on registration.
+   * MongoDB TTL index auto-deletes the document when this date is reached
+   * (only while emailVerified is false — we $unset this field on verification).
+   */
+  @Prop()
+  verificationExpiry: Date;
 }
 
 export const AgentSchema = SchemaFactory.createForClass(Agent);
+
+// Auto-delete unverified accounts when verificationExpiry is reached (~60s precision)
+AgentSchema.index({ verificationExpiry: 1 }, { expireAfterSeconds: 0 });

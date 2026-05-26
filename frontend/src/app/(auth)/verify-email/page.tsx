@@ -1,41 +1,60 @@
 'use client';
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { GraduationCap, Mail, ArrowLeft, RefreshCw, CheckCircle } from 'lucide-react';
+import { GraduationCap, Mail, ArrowLeft, RefreshCw, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { authApi } from '@/lib/api/auth.api';
 import { useAuthStore } from '@/lib/store/auth.store';
 import { UserRole } from '@/types';
 
 const ROLE_REDIRECT: Record<string, string> = {
-  student: '/student',
-  agent:   '/agent',
+  student:    '/student',
+  agent:      '/agent',
   university: '/university',
-  admin:   '/admin',
+  admin:      '/admin',
 };
 
+const EXPIRY_SECONDS = 5 * 60; // 5 minutes — must match backend
+
 function VerifyEmailContent() {
-  const router   = useRouter();
-  const params   = useSearchParams();
-  const setAuth  = useAuthStore((s) => s.setAuth);
+  const router  = useRouter();
+  const params  = useSearchParams();
+  const setAuth = useAuthStore((s) => s.setAuth);
 
-  const email  = params.get('email') || '';
-  const role   = params.get('role')  || 'student';
+  const email = params.get('email') || '';
+  const role  = params.get('role')  || 'student';
 
-  const [digits, setDigits] = useState(['', '', '', '', '', '']);
+  const [digits, setDigits]       = useState(['', '', '', '', '', '']);
   const [loading, setLoading]     = useState(false);
   const [resending, setResending] = useState(false);
-  const [error, setError]   = useState('');
-  const [success, setSuccess] = useState('');
-  const [countdown, setCountdown] = useState(60);
-  const [canResend, setCanResend] = useState(false);
-  const refs = useRef<Array<HTMLInputElement | null>>([]);
+  const [error, setError]         = useState('');
+  const [success, setSuccess]     = useState('');
 
-  // countdown timer for resend
+  // ── 5-min expiry countdown ──────────────────────────────────────
+  const [expiryLeft, setExpiryLeft] = useState(EXPIRY_SECONDS);
+  const [expired, setExpired]       = useState(false);
+
   useEffect(() => {
-    if (countdown <= 0) { setCanResend(true); return; }
-    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    if (expiryLeft <= 0) { setExpired(true); return; }
+    const t = setTimeout(() => setExpiryLeft((s) => s - 1), 1000);
     return () => clearTimeout(t);
-  }, [countdown]);
+  }, [expiryLeft]);
+
+  const expiryMins = Math.floor(expiryLeft / 60);
+  const expirySecs = expiryLeft % 60;
+  const expiryDisplay = `${expiryMins}:${String(expirySecs).padStart(2, '0')}`;
+  const expiryUrgent  = expiryLeft <= 60; // last minute → red
+
+  // ── resend cooldown ─────────────────────────────────────────────
+  const [resendCooldown, setResendCooldown] = useState(60);
+  const [canResend, setCanResend]           = useState(false);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) { setCanResend(true); return; }
+    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
+  const refs = useRef<Array<HTMLInputElement | null>>([]);
 
   function handleDigit(index: number, value: string) {
     const v = value.replace(/\D/g, '').slice(-1);
@@ -68,21 +87,24 @@ function VerifyEmailContent() {
     setError('');
     try {
       const res = await authApi.verifyEmail(email, code, role);
-      const { verified, pendingApproval, token, user } = res.data;
+      const { pendingApproval, token, user } = res.data;
 
       if (pendingApproval) {
-        // Agent / University: redirect to a pending-approval notice
         router.push(`/login?notice=pending&role=${role}`);
         return;
       }
-
-      // Student / Admin: log them straight in
       if (token && user) {
         setAuth(user, token, role as UserRole);
         router.push(ROLE_REDIRECT[role] || '/student');
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Verification failed. Please try again.');
+      const msg: string = err?.response?.data?.message || 'Verification failed. Please try again.';
+      // Account was auto-deleted by MongoDB TTL
+      if (msg.toLowerCase().includes('expired') || msg.toLowerCase().includes('register again')) {
+        setExpired(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -95,17 +117,52 @@ function VerifyEmailContent() {
     try {
       await authApi.resendVerificationCode(email, role);
       setSuccess('A new code has been sent to your email.');
-      setCountdown(60);
+      // Reset both countdowns
+      setResendCooldown(60);
       setCanResend(false);
+      setExpiryLeft(EXPIRY_SECONDS);
+      setExpired(false);
       setDigits(['', '', '', '', '', '']);
       refs.current[0]?.focus();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to resend code.');
+      const msg: string = err?.response?.data?.message || 'Failed to resend code.';
+      if (msg.toLowerCase().includes('expired') || msg.toLowerCase().includes('register again')) {
+        setExpired(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setResending(false);
     }
   }
 
+  // ── EXPIRED SCREEN ──────────────────────────────────────────────
+  if (expired) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white px-6">
+        <div className="w-full max-w-md text-center">
+          <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-200">
+            <AlertCircle size={32} className="text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Expired</h2>
+          <p className="text-sm text-gray-500 leading-relaxed mb-6">
+            You didn't verify your email within 5 minutes, so your account details have been deleted for security. Please register again — it only takes a moment.
+          </p>
+          <a
+            href="/register"
+            className="block w-full bg-[#1a3a6b] hover:bg-[#163060] text-white font-semibold py-3 rounded-lg text-sm transition-colors text-center"
+          >
+            Register Again
+          </a>
+          <a href="/login" className="inline-block mt-3 text-sm text-blue-600 hover:underline">
+            Already have an account? Sign in
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // ── MAIN VERIFY SCREEN ──────────────────────────────────────────
   return (
     <div className="min-h-screen flex">
       {/* Left panel */}
@@ -128,11 +185,11 @@ function VerifyEmailContent() {
           </div>
           <h1 className="text-3xl font-bold text-white leading-tight mb-3">Check Your Inbox</h1>
           <p className="text-blue-200 text-sm leading-relaxed max-w-xs">
-            We sent a 6-digit verification code to your email address. Enter it to confirm your identity and activate your account.
+            We sent a 6-digit verification code to your email. Enter it within 5 minutes to activate your account.
           </p>
           <ul className="mt-6 space-y-2">
             {[
-              'Code expires in 10 minutes',
+              'Code expires in 5 minutes',
               'Check spam/junk if not found',
               'Request a new code if expired',
             ].map((item) => (
@@ -158,7 +215,7 @@ function VerifyEmailContent() {
             <ArrowLeft size={16} /> Back
           </button>
 
-          <div className="flex flex-col items-center text-center mb-8">
+          <div className="flex flex-col items-center text-center mb-6">
             <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4 border border-blue-100">
               <Mail size={28} className="text-blue-600" />
             </div>
@@ -169,8 +226,20 @@ function VerifyEmailContent() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* OTP digits */}
+          {/* ── Live expiry countdown ── */}
+          <div className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 mb-5 border ${
+            expiryUrgent
+              ? 'bg-red-50 border-red-200 text-red-700'
+              : 'bg-amber-50 border-amber-200 text-amber-700'
+          }`}>
+            <Clock size={15} />
+            <span className="text-sm font-medium">
+              {expiryUrgent ? 'Hurry! Code expires in ' : 'Code expires in '}
+              <span className="font-bold tabular-nums">{expiryDisplay}</span>
+            </span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 text-center mb-3">
                 Enter your verification code
@@ -216,8 +285,8 @@ function VerifyEmailContent() {
             </button>
           </form>
 
-          {/* Resend section */}
-          <div className="mt-6 text-center">
+          {/* Resend */}
+          <div className="mt-5 text-center">
             <p className="text-sm text-gray-500 mb-2">Didn't receive the code?</p>
             {canResend ? (
               <button
@@ -230,7 +299,7 @@ function VerifyEmailContent() {
               </button>
             ) : (
               <p className="text-sm text-gray-400">
-                Resend available in <span className="font-semibold text-gray-600">{countdown}s</span>
+                Resend available in <span className="font-semibold text-gray-600">{resendCooldown}s</span>
               </p>
             )}
           </div>

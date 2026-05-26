@@ -89,6 +89,7 @@ let University = class University {
     rejectionReason;
     isVerified;
     emailVerified;
+    verificationExpiry;
 };
 exports.University = University;
 __decorate([
@@ -155,8 +156,13 @@ __decorate([
     (0, mongoose_1.Prop)({ default: false }),
     __metadata("design:type", Boolean)
 ], University.prototype, "emailVerified", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Date)
+], University.prototype, "verificationExpiry", void 0);
 exports.University = University = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], University);
 exports.UniversitySchema = mongoose_1.SchemaFactory.createForClass(University);
+exports.UniversitySchema.index({ verificationExpiry: 1 }, { expireAfterSeconds: 0 });
 //# sourceMappingURL=university.schema.js.map

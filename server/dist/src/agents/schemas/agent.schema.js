@@ -30,6 +30,7 @@ let Agent = class Agent {
     rejectionReason;
     isVerified;
     emailVerified;
+    verificationExpiry;
 };
 exports.Agent = Agent;
 __decorate([
@@ -100,8 +101,13 @@ __decorate([
     (0, mongoose_1.Prop)({ default: false }),
     __metadata("design:type", Boolean)
 ], Agent.prototype, "emailVerified", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Date)
+], Agent.prototype, "verificationExpiry", void 0);
 exports.Agent = Agent = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Agent);
 exports.AgentSchema = mongoose_1.SchemaFactory.createForClass(Agent);
+exports.AgentSchema.index({ verificationExpiry: 1 }, { expireAfterSeconds: 0 });
 //# sourceMappingURL=agent.schema.js.map

@@ -31,7 +31,7 @@ export class MailService {
               <div style="background:#f3f4f6;border-radius:10px;padding:20px 0;text-align:center;margin-bottom:24px;">
                 <span style="font-size:36px;font-weight:800;letter-spacing:10px;color:#1a3a6b;font-family:monospace;">${code}</span>
               </div>
-              <p style="margin:0 0 8px;color:#6b7280;font-size:13px;line-height:1.6;">This code expires in <strong>10 minutes</strong>. Do not share it with anyone.</p>
+              <p style="margin:0 0 8px;color:#6b7280;font-size:13px;line-height:1.6;">This code expires in <strong>5 minutes</strong>. Do not share it with anyone.</p>
               <p style="margin:0;color:#9ca3af;font-size:12px;">If you did not create an account on riftApply, please ignore this email.</p>
             </div>
             <div style="background:#f9fafb;padding:16px 40px;border-top:1px solid #e5e7eb;">

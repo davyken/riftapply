@@ -65,6 +65,9 @@ export declare class AuthService {
         role: string;
     }>;
     private sendOtp;
+    private unsetVerificationExpiry;
+    private extendVerificationExpiry;
+    private getModelForRole;
     private findUserByEmailAndRole;
     private signToken;
     private sanitize;

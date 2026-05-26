@@ -18,16 +18,16 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { MailService } from '../mail/mail.service';
 import { UserRole, AccountStatus, AgentType } from '../common/enums';
 
+const VERIFICATION_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+
 /** Generate a 6-digit numeric OTP */
 function generateOtp(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-/** 10 minutes from now */
+/** 5 minutes from now */
 function otpExpiry(): Date {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() + 10);
-  return d;
+  return new Date(Date.now() + VERIFICATION_WINDOW_MS);
 }
 
 @Injectable()
@@ -63,6 +63,7 @@ export class AuthService {
       role: UserRole.STUDENT,
       status: AccountStatus.ACTIVE,
       emailVerified: false,
+      verificationExpiry: otpExpiry(), // auto-delete after 5 min if not verified
     });
 
     await this.sendOtp(dto.email.toLowerCase(), OtpType.EMAIL_VERIFICATION, 'student', dto.firstName);
@@ -106,6 +107,7 @@ export class AuthService {
       avatar: avatarUrl,
       status: AccountStatus.PENDING,
       emailVerified: false,
+      verificationExpiry: otpExpiry(), // auto-delete after 5 min if not verified
     };
 
     if (dto.agentType === AgentType.PERSONAL && files?.cniDocument?.[0]) {
@@ -139,6 +141,7 @@ export class AuthService {
       password: hashed,
       status: AccountStatus.PENDING,
       emailVerified: false,
+      verificationExpiry: otpExpiry(), // auto-delete after 5 min if not verified
     };
 
     if (logo) {
@@ -175,11 +178,18 @@ export class AuthService {
     otp.used = true;
     await otp.save();
 
-    // Mark email as verified
+    // Find the user — may have been auto-deleted if they took too long
     const user = await this.findUserByEmailAndRole(normalizedEmail, role);
-    if (!user) throw new NotFoundException('Account not found.');
+    if (!user) {
+      throw new BadRequestException(
+        'Your registration has expired. Please register again.',
+      );
+    }
+
+    // Mark email verified and REMOVE the TTL field so MongoDB never deletes this account
     user.emailVerified = true;
     await user.save();
+    await this.unsetVerificationExpiry(normalizedEmail, role);
 
     // Students get logged in immediately; agents & universities wait for admin
     if (role === 'student' || role === 'admin') {
@@ -204,8 +214,15 @@ export class AuthService {
   async resendVerificationCode(email: string, role: string) {
     const normalizedEmail = email.toLowerCase();
     const user = await this.findUserByEmailAndRole(normalizedEmail, role);
-    if (!user) throw new NotFoundException('Account not found for this email and role.');
+    if (!user) {
+      throw new BadRequestException(
+        'Your registration has expired. Please register again.',
+      );
+    }
     if (user.emailVerified) throw new BadRequestException('Email is already verified.');
+
+    // Extend the account TTL by another 5 minutes so they have time to use the new code
+    await this.extendVerificationExpiry(normalizedEmail, role);
 
     const name = user.firstName || user.name || normalizedEmail;
     await this.sendOtp(normalizedEmail, OtpType.EMAIL_VERIFICATION, role, name);
@@ -317,6 +334,29 @@ export class AuthService {
     } else {
       await this.mailService.sendVerificationCode(email, code, name);
     }
+  }
+
+  /** Remove verificationExpiry so MongoDB TTL never deletes a verified account */
+  private async unsetVerificationExpiry(email: string, role: string): Promise<void> {
+    const model = this.getModelForRole(role);
+    if (model) {
+      await model.updateOne({ email }, { $unset: { verificationExpiry: '' } });
+    }
+  }
+
+  /** Push verificationExpiry forward by 5 minutes (called on resend) */
+  private async extendVerificationExpiry(email: string, role: string): Promise<void> {
+    const model = this.getModelForRole(role);
+    if (model) {
+      await model.updateOne({ email }, { verificationExpiry: otpExpiry() });
+    }
+  }
+
+  private getModelForRole(role: string): Model<any> | null {
+    if (role === 'student' || role === 'admin') return this.userModel;
+    if (role === 'agent') return this.agentModel;
+    if (role === 'university') return this.universityModel;
+    return null;
   }
 
   private async findUserByEmailAndRole(email: string, role: string): Promise<any | null> {

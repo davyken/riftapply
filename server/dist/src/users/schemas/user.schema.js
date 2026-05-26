@@ -25,6 +25,7 @@ let User = class User {
     desiredField;
     desiredModule;
     emailVerified;
+    verificationExpiry;
 };
 exports.User = User;
 __decorate([
@@ -75,8 +76,13 @@ __decorate([
     (0, mongoose_1.Prop)({ default: false }),
     __metadata("design:type", Boolean)
 ], User.prototype, "emailVerified", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Date)
+], User.prototype, "verificationExpiry", void 0);
 exports.User = User = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], User);
 exports.UserSchema = mongoose_1.SchemaFactory.createForClass(User);
+exports.UserSchema.index({ verificationExpiry: 1 }, { expireAfterSeconds: 0 });
 //# sourceMappingURL=user.schema.js.map

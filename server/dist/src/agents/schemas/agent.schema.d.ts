@@ -19,6 +19,7 @@ export declare class Agent {
     rejectionReason: string;
     isVerified: boolean;
     emailVerified: boolean;
+    verificationExpiry: Date;
 }
 export declare const AgentSchema: import("mongoose").Schema<Agent, import("mongoose").Model<Agent, any, any, any, any, any, Agent>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Agent, Document<unknown, {}, Agent, {
     id: string;
@@ -174,6 +175,15 @@ export declare const AgentSchema: import("mongoose").Schema<Agent, import("mongo
         id: string;
     }> | undefined;
     emailVerified?: import("mongoose").SchemaDefinitionProperty<boolean, Agent, Document<unknown, {}, Agent, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Agent & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+    verificationExpiry?: import("mongoose").SchemaDefinitionProperty<Date, Agent, Document<unknown, {}, Agent, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Agent & {
         _id: import("mongoose").Types.ObjectId;
