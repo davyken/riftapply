@@ -109,116 +109,121 @@ export default function Sidebar() {
     return pathname.startsWith(href);
   }
 
-  function handleNavClick() {
-    closeMobile();
-  }
+  // ─── Sidebar inner content (shared between mobile drawer & desktop) ───────
+  // `isDesktop` = true → apply collapsed logic; false → always show full sidebar
+  function SidebarInner({ isDesktop }: { isDesktop: boolean }) {
+    const slim = isDesktop && collapsed;
 
-  const sidebarContent = (
-    <aside
-      className={`
-        relative flex flex-col flex-shrink-0 bg-[#0f2544] h-full overflow-y-auto overflow-x-hidden
-        transition-all duration-200 ease-in-out
-        w-[220px] md:${collapsed ? 'w-16' : 'w-[220px]'}
-      `}
-    >
-      {/* Logo */}
-      <div className={`flex items-center gap-2 border-b border-white/10 ${collapsed ? 'md:justify-center md:px-0 px-5 py-5' : 'px-5 py-5'}`}>
-        <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center flex-shrink-0">
-          <GraduationCap size={16} className="text-white" />
-        </div>
-        <div className={collapsed ? 'md:hidden' : ''}>
-          <div className="text-sm font-bold text-white leading-tight">riftApply</div>
-          <p className="text-[10px] text-blue-300 leading-tight">{PORTAL_LABEL[currentRole]}</p>
-        </div>
-      </div>
+    return (
+      <aside className="relative flex flex-col w-full h-full bg-[#0f2544] overflow-y-auto overflow-x-hidden">
 
-      {/* New Application button */}
-      {SHOW_NEW_APP_BTN.includes(currentRole) && (
-        <div className={`pt-4 ${collapsed ? 'md:px-2 px-4' : 'px-4'}`}>
-          <button
-            onClick={() => { router.push(`/${currentRole}/applications/new`); handleNavClick(); }}
-            title="New Application"
-            className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"
+        {/* ── Logo ── */}
+        <div className={`flex items-center gap-2 border-b border-white/10 px-5 py-5 ${slim ? 'justify-center px-0' : ''}`}>
+          <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center flex-shrink-0">
+            <GraduationCap size={16} className="text-white" />
+          </div>
+          {!slim && (
+            <div>
+              <div className="text-sm font-bold text-white leading-tight">riftApply</div>
+              <p className="text-[10px] text-blue-300 leading-tight">{PORTAL_LABEL[currentRole]}</p>
+            </div>
+          )}
+        </div>
+
+        {/* ── New Application button (agents only) ── */}
+        {SHOW_NEW_APP_BTN.includes(currentRole) && (
+          <div className={`pt-4 ${slim ? 'px-2' : 'px-4'}`}>
+            <button
+              onClick={() => { router.push(`/${currentRole}/applications/new`); if (!isDesktop) closeMobile(); }}
+              title="New Application"
+              className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"
+            >
+              <Plus size={16} />
+              {!slim && <span>New Application</span>}
+            </button>
+          </div>
+        )}
+
+        {/* ── Nav ── */}
+        <nav className={`flex-1 py-4 space-y-0.5 ${slim ? 'px-2' : 'px-3'}`}>
+          {navItems.map((item) => {
+            const itemBadge = item.href === badgeHref && unreadCount > 0 ? unreadCount : 0;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => { if (!isDesktop) closeMobile(); }}
+                title={slim ? item.label : undefined}
+                className={`
+                  flex items-center gap-3 rounded-lg text-sm font-medium transition-colors relative
+                  ${slim ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'}
+                  ${isActive(item.href)
+                    ? 'bg-blue-500/20 text-white'
+                    : 'text-blue-200 hover:bg-white/5 hover:text-white'
+                  }
+                `}
+              >
+                <span className={`flex-shrink-0 ${isActive(item.href) ? 'text-blue-300' : 'text-blue-400'}`}>
+                  {item.icon}
+                </span>
+                {!slim && <span>{item.label}</span>}
+
+                {/* Badge */}
+                {itemBadge > 0 && (
+                  <>
+                    {!slim && (
+                      <span className="ml-auto bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-4 rounded-full flex items-center justify-center px-1">
+                        {itemBadge > 99 ? '99+' : itemBadge}
+                      </span>
+                    )}
+                    {slim && (
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                    )}
+                  </>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* ── Bottom ── */}
+        <div className={`py-4 border-t border-white/10 space-y-0.5 ${slim ? 'px-2' : 'px-3'}`}>
+          <Link
+            href="/help"
+            onClick={() => { if (!isDesktop) closeMobile(); }}
+            title={slim ? 'Help Center' : undefined}
+            className={`flex items-center gap-3 rounded-lg text-sm font-medium text-blue-200 hover:bg-white/5 hover:text-white transition-colors ${slim ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'}`}
           >
-            <Plus size={16} />
-            <span className={collapsed ? 'md:hidden' : ''}>New Application</span>
+            <HelpCircle size={18} className="text-blue-400 flex-shrink-0" />
+            {!slim && <span>Help Center</span>}
+          </Link>
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            title={slim ? 'Logout' : undefined}
+            className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-blue-200 hover:bg-white/5 hover:text-white transition-colors ${slim ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'}`}
+          >
+            <LogOut size={18} className="text-blue-400 flex-shrink-0" />
+            {!slim && <span>Logout</span>}
           </button>
         </div>
-      )}
 
-      {/* Nav */}
-      <nav className={`flex-1 py-4 space-y-0.5 ${collapsed ? 'md:px-2 px-3' : 'px-3'}`}>
-        {navItems.map((item) => {
-          const itemBadge = item.href === badgeHref && unreadCount > 0 ? unreadCount : 0;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={handleNavClick}
-              title={collapsed ? item.label : undefined}
-              className={`flex items-center gap-3 rounded-lg text-sm font-medium transition-colors relative
-                ${collapsed ? 'md:px-0 md:py-2.5 md:justify-center px-3 py-2.5' : 'px-3 py-2.5'}
-                ${isActive(item.href)
-                  ? 'bg-blue-500/20 text-white'
-                  : 'text-blue-200 hover:bg-white/5 hover:text-white'
-                }`}
-            >
-              <span className={`flex-shrink-0 ${isActive(item.href) ? 'text-blue-300' : 'text-blue-400'}`}>
-                {item.icon}
-              </span>
-              <span className={collapsed ? 'md:hidden' : ''}>{item.label}</span>
-              {itemBadge > 0 && (
-                <>
-                  <span className={`ml-auto bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-4 rounded-full flex items-center justify-center px-1 ${collapsed ? 'md:hidden' : ''}`}>
-                    {itemBadge > 99 ? '99+' : itemBadge}
-                  </span>
-                  {collapsed && (
-                    <span className="hidden md:block absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                  )}
-                </>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Bottom */}
-      <div className={`py-4 border-t border-white/10 space-y-0.5 ${collapsed ? 'md:px-2 px-3' : 'px-3'}`}>
-        <Link
-          href="/help"
-          onClick={handleNavClick}
-          title={collapsed ? 'Help Center' : undefined}
-          className={`flex items-center gap-3 rounded-lg text-sm font-medium text-blue-200 hover:bg-white/5 hover:text-white transition-colors
-            ${collapsed ? 'md:px-0 md:py-2.5 md:justify-center px-3 py-2.5' : 'px-3 py-2.5'}`}
-        >
-          <HelpCircle size={18} className="text-blue-400 flex-shrink-0" />
-          <span className={collapsed ? 'md:hidden' : ''}>Help Center</span>
-        </Link>
-        <button
-          onClick={() => setShowLogoutModal(true)}
-          title={collapsed ? 'Logout' : undefined}
-          className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-blue-200 hover:bg-white/5 hover:text-white transition-colors
-            ${collapsed ? 'md:px-0 md:py-2.5 md:justify-center px-3 py-2.5' : 'px-3 py-2.5'}`}
-        >
-          <LogOut size={18} className="text-blue-400 flex-shrink-0" />
-          <span className={collapsed ? 'md:hidden' : ''}>Logout</span>
-        </button>
-      </div>
-
-      {/* Collapse toggle — desktop only */}
-      <button
-        onClick={toggle}
-        title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className="hidden md:flex items-center justify-center w-6 h-6 rounded-full bg-[#1a3a6b] border border-white/20 text-white hover:bg-blue-500 transition-colors absolute -right-3 top-[72px] z-10 shadow-md"
-      >
-        {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
-      </button>
-    </aside>
-  );
+        {/* ── Collapse toggle button (desktop only) ── */}
+        {isDesktop && (
+          <button
+            onClick={toggle}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="flex items-center justify-center w-6 h-6 rounded-full bg-[#1a3a6b] border border-white/20 text-white hover:bg-blue-500 transition-colors absolute -right-3 top-[72px] z-10 shadow-md"
+          >
+            {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
+          </button>
+        )}
+      </aside>
+    );
+  }
 
   return (
     <>
-      {/* Mobile overlay backdrop */}
+      {/* ── Mobile overlay backdrop ── */}
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
@@ -226,20 +231,32 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Mobile: fixed overlay drawer */}
-      <div className={`fixed inset-y-0 left-0 z-40 h-full md:hidden transition-transform duration-200 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        {sidebarContent}
+      {/* ── Mobile: slide-in drawer (always full width, never collapsed) ── */}
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-40 w-[220px] h-full md:hidden
+          transition-transform duration-200 ease-in-out
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <SidebarInner isDesktop={false} />
       </div>
 
-      {/* Desktop: inline sidebar */}
-      <div className={`hidden md:flex h-screen flex-shrink-0 transition-all duration-200 ${collapsed ? 'w-16' : 'w-[220px]'}`}>
-        {sidebarContent}
+      {/* ── Desktop: inline sidebar (collapsible) ── */}
+      <div
+        className={`
+          hidden md:flex flex-shrink-0 h-screen relative
+          transition-all duration-200 ease-in-out
+          ${collapsed ? 'w-16' : 'w-[220px]'}
+        `}
+      >
+        <SidebarInner isDesktop={true} />
       </div>
 
-      {/* Logout Confirmation Modal */}
+      {/* ── Logout confirmation modal ── */}
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-2">Confirm Logout</h3>
             <p className="text-sm text-gray-500 mb-6">Are you sure you want to log out of your account?</p>
             <div className="flex items-center gap-3 justify-end">
