@@ -12,12 +12,38 @@ import {
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
+import * as bcrypt from 'bcrypt';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { RegisterStudentDto, RegisterAgentDto, RegisterUniversityDto, LoginDto } from './dto/register.dto';
 import { multerOptions } from '../common/multer.config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    @InjectModel('User') private userModel: Model<any>,
+  ) {}
+
+  @Get('seed-admin')
+  async seedAdmin() {
+    const email = 'admin@uniadmit.com';
+    const exists = await this.userModel.findOne({ email });
+    if (exists) {
+      return { message: 'Admin already exists' };
+    }
+    const hashed = await bcrypt.hash('Admin@2024', 10);
+    await this.userModel.create({
+      firstName: 'Super',
+      lastName: 'Admin',
+      email,
+      password: hashed,
+      phone: '+1-000-000-0000',
+      role: 'admin',
+      status: 'active',
+    });
+    return { message: 'Admin created successfully!' };
+  }
 
   @Post('register/student')
   @UseInterceptors(FileInterceptor('avatar', multerOptions))
