@@ -280,9 +280,6 @@ let AuthService = class AuthService {
         const passwordValid = await bcrypt.compare(dto.password, user.password);
         if (!passwordValid)
             throw new common_1.UnauthorizedException('Invalid credentials');
-        if (!user.emailVerified) {
-            throw new common_1.UnauthorizedException('Please verify your email before logging in. Check your inbox for the verification code.');
-        }
         if (user.status === enums_1.AccountStatus.PENDING) {
             throw new common_1.UnauthorizedException('Account pending admin approval');
         }

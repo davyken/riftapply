@@ -292,11 +292,6 @@ export class AuthService {
     const passwordValid = await bcrypt.compare(dto.password, user.password);
     if (!passwordValid) throw new UnauthorizedException('Invalid credentials');
 
-    // Must verify email before logging in
-    if (!user.emailVerified) {
-      throw new UnauthorizedException('Please verify your email before logging in. Check your inbox for the verification code.');
-    }
-
     if (user.status === AccountStatus.PENDING) {
       throw new UnauthorizedException('Account pending admin approval');
     }
