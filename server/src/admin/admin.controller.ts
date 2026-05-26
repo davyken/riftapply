@@ -149,6 +149,14 @@ export class AdminController {
     return this.adminService.buildWaitingEmailTemplate(candidateName, universityName);
   }
 
+  // ─── Broadcast Email ──────────────────────────────────────────────
+  @Post('broadcast-email')
+  broadcastEmail(
+    @Body() body: { subject: string; message: string; roles?: string[] },
+  ) {
+    return this.adminService.broadcastEmail(body);
+  }
+
   // ─── Migrations ───────────────────────────────────────────────────
   @Post('migrate/university-ids')
   migrateUniversityIds() {

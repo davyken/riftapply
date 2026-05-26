@@ -48,4 +48,8 @@ export const adminApi = {
   deleteUniversity:   (id: string)      => api.delete(`/admin/universities/${id}`),
   getAllStudents:     ()                => api.get('/admin/students'),
   deleteStudent:      (id: string)      => api.delete(`/admin/students/${id}`),
+
+  // Broadcast email
+  broadcastEmail: (data: { subject: string; message: string; roles?: string[] }) =>
+    api.post('/admin/broadcast-email', data),
 };

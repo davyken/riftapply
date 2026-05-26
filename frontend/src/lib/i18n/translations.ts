@@ -453,6 +453,27 @@ const t = {
     subtitle: { en: 'Please read these terms carefully before using the riftApply platform.', fr: 'Veuillez lire attentivement ces conditions avant d\'utiliser la plateforme riftApply.' },
   },
 
+  // ─── Broadcast Email ─────────────────────────────────────────────────────
+  broadcast: {
+    title:        { en: 'Broadcast Email',                              fr: 'Email groupé' },
+    desc:         { en: 'Send a message to all users or a specific group.', fr: 'Envoyer un message à tous les utilisateurs ou un groupe.' },
+    target:       { en: 'Recipients',                                   fr: 'Destinataires' },
+    all:          { en: 'All verified users',                           fr: 'Tous les utilisateurs vérifiés' },
+    students:     { en: 'Students only',                                fr: 'Étudiants seulement' },
+    agents:       { en: 'Agents only',                                  fr: 'Agents seulement' },
+    universities: { en: 'Universities only',                            fr: 'Universités seulement' },
+    subject:      { en: 'Subject',                                      fr: 'Objet' },
+    message:      { en: 'Message',                                      fr: 'Message' },
+    send:         { en: 'Send Broadcast',                               fr: 'Envoyer' },
+    sending:      { en: 'Sending…',                                     fr: 'Envoi en cours…' },
+    successMsg:   { en: 'Broadcast sent successfully!',                 fr: 'Message envoyé avec succès !' },
+    errorEmpty:   { en: 'Subject and message are required.',            fr: "L'objet et le message sont requis." },
+    errorFail:    { en: 'Failed to send broadcast. Please try again.',  fr: "Échec de l'envoi. Veuillez réessayer." },
+    sent:         { en: 'sent',                                         fr: 'envoyés' },
+    failed:       { en: 'failed',                                       fr: 'échoués' },
+    recipients:   { en: 'recipients',                                   fr: 'destinataires' },
+  },
+
   // ─── Privacy Policy ───────────────────────────────────────────────────────
   privacyPage: {
     title: { en: 'Privacy Policy', fr: 'Politique de confidentialité' },

@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Mail, Send, CheckCircle, Pencil, Bell, Circle, CheckCheck } from 'lucide-react';
+import { Mail, Send, CheckCircle, Pencil, Bell, Circle, CheckCheck, Megaphone, Users } from 'lucide-react';
 import { notificationsApi } from '@/lib/api/notifications.api';
+import { adminApi } from '@/lib/api/admin.api';
 import { useNotificationStore } from '@/lib/store/notifications.store';
 import { PageLoader, ErrorBanner } from '@/components/ui/PageLoader';
+import { useT } from '@/lib/i18n/useT';
 import type { Notification } from '@/types';
 
 type TemplateKey = 'acceptance' | 'rejection' | 'info_request' | 'pending_review' | 'sent_to_uni';
@@ -100,7 +102,11 @@ function MessageBody({ body }: { body: string }) {
   return <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line">{body}</p>;
 }
 
+type BroadcastTarget = 'all' | 'student' | 'agent' | 'university';
+
 export default function AdminEmailsPage() {
+  const { T, t } = useT();
+
   const [templates, setTemplates] = useState<Template[]>(initialTemplates);
   const [editing,   setEditing]   = useState<TemplateKey | null>(null);
   const [draft,     setDraft]     = useState<Template | null>(null);
@@ -111,6 +117,14 @@ export default function AdminEmailsPage() {
   const [msgError,  setMsgError]  = useState('');
   const [selected,  setSelected]  = useState<Notification | null>(null);
   const { decrement, reset } = useNotificationStore();
+
+  // ─── Broadcast state ─────────────────────────────────────────────
+  const [bcTarget,  setBcTarget]  = useState<BroadcastTarget>('all');
+  const [bcSubject, setBcSubject] = useState('');
+  const [bcMessage, setBcMessage] = useState('');
+  const [bcSending, setBcSending] = useState(false);
+  const [bcResult,  setBcResult]  = useState<{ sent: number; failed: number; total: number } | null>(null);
+  const [bcError,   setBcError]   = useState('');
 
   function loadMsgs() {
     setLoadingMsgs(true); setMsgError('');
@@ -144,6 +158,27 @@ export default function AdminEmailsPage() {
     setSaved(draft.key);
     setTimeout(() => setSaved(null), 2000);
     setEditing(null);
+  }
+
+  async function handleBroadcast() {
+    setBcError('');
+    setBcResult(null);
+    if (!bcSubject.trim() || !bcMessage.trim()) {
+      setBcError(T(t.broadcast.errorEmpty));
+      return;
+    }
+    setBcSending(true);
+    try {
+      const roles = bcTarget === 'all' ? [] : [bcTarget];
+      const res = await adminApi.broadcastEmail({ subject: bcSubject, message: bcMessage, roles });
+      setBcResult(res.data);
+      setBcSubject('');
+      setBcMessage('');
+    } catch {
+      setBcError(T(t.broadcast.errorFail));
+    } finally {
+      setBcSending(false);
+    }
   }
 
   return (
@@ -293,6 +328,104 @@ export default function AdminEmailsPage() {
               )}
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Broadcast Email */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+          <Megaphone size={16} className="text-gray-400" />
+          <div>
+            <h2 className="font-semibold text-gray-900">{T(t.broadcast.title)}</h2>
+            <p className="text-xs text-gray-400 mt-0.5">{T(t.broadcast.desc)}</p>
+          </div>
+        </div>
+
+        <div className="px-5 py-5 space-y-4">
+          {/* Target selector */}
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1 block">
+              <Users size={12} /> {T(t.broadcast.target)}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {([ 'all', 'student', 'agent', 'university' ] as BroadcastTarget[]).map((role) => {
+                const labels: Record<BroadcastTarget, { en: string; fr: string }> = {
+                  all:        t.broadcast.all,
+                  student:    t.broadcast.students,
+                  agent:      t.broadcast.agents,
+                  university: t.broadcast.universities,
+                };
+                return (
+                  <button
+                    key={role}
+                    onClick={() => { setBcTarget(role); setBcResult(null); }}
+                    className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors ${
+                      bcTarget === role
+                        ? 'bg-[#1a3a6b] text-white border-[#1a3a6b]'
+                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    {T(labels[role])}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Subject */}
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">{T(t.broadcast.subject)}</label>
+            <input
+              type="text"
+              value={bcSubject}
+              onChange={(e) => { setBcSubject(e.target.value); setBcResult(null); setBcError(''); }}
+              placeholder={T(t.broadcast.subject)}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Message */}
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">{T(t.broadcast.message)}</label>
+            <textarea
+              rows={5}
+              value={bcMessage}
+              onChange={(e) => { setBcMessage(e.target.value); setBcResult(null); setBcError(''); }}
+              placeholder={T(t.broadcast.message)}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+          </div>
+
+          {/* Error */}
+          {bcError && (
+            <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{bcError}</p>
+          )}
+
+          {/* Success */}
+          {bcResult && (
+            <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+              <CheckCircle size={14} className="flex-shrink-0" />
+              <span>
+                {T(t.broadcast.successMsg)}{' '}
+                <strong>{bcResult.sent}</strong> {T(t.broadcast.sent)}
+                {bcResult.failed > 0 && (
+                  <span className="text-orange-600"> · {bcResult.failed} {T(t.broadcast.failed)}</span>
+                )}
+              </span>
+            </div>
+          )}
+
+          {/* Send button */}
+          <div className="flex justify-end">
+            <button
+              onClick={handleBroadcast}
+              disabled={bcSending}
+              className="flex items-center gap-2 text-sm bg-[#1a3a6b] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#163060] disabled:opacity-50 transition-colors"
+            >
+              <Send size={14} />
+              {bcSending ? T(t.broadcast.sending) : T(t.broadcast.send)}
+            </button>
+          </div>
         </div>
       </div>
 
