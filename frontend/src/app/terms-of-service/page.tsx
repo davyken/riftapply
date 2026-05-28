@@ -4,129 +4,230 @@ import { GraduationCap, ArrowLeft, Shield } from 'lucide-react';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import { useT } from '@/lib/i18n/useT';
 
-const SECTIONS = {
+interface Section {
+  title: string;
+  body?: string;
+  list?: string[];
+  note?: string;
+}
+
+const SECTIONS: Record<'en' | 'fr', Section[]> = {
   en: [
     {
-      title: '1. Acceptance of Terms',
-      body: `By accessing or using the riftApply platform ("Platform"), you agree to be legally bound by these Terms of Service ("Terms"). If you do not agree with any part of these Terms, you must not use the Platform. These Terms apply to all users including students, agents, university representatives, and administrators.`,
+      title: '1. Our Services',
+      body: 'riftApply is an international university admissions platform owned by GreatRift Consultancy. We connect students with accredited universities across 30+ countries through a streamlined application process and a network of verified education agents.',
+      list: [
+        'Creating student profiles',
+        'Browsing and applying to partner universities',
+        'Connecting with verified agents',
+        'Tracking applications',
+        'Receiving support throughout the admission journey',
+      ],
     },
     {
-      title: '2. Description of Service',
-      body: `riftApply is an online university admissions platform that facilitates the submission, tracking, and management of applications between students, verified agents, and partner universities. riftApply acts solely as an intermediary and does not guarantee admission to any institution.`,
+      title: '2. Eligibility',
+      body: 'You must be at least 18 years old (or the age of majority in your jurisdiction) to use our Services. By using the Platform, you represent and warrant that you meet this requirement.',
+      note: 'Students under 18 may only use the Platform with the consent and involvement of a parent or legal guardian.',
     },
     {
-      title: '3. User Accounts & Eligibility',
-      body: `You must be at least 16 years of age to create an account. You agree to provide accurate, current, and complete information during registration and to update such information to keep it accurate. Each user may maintain only one account. Sharing account credentials is strictly prohibited.`,
+      title: '3. User Accounts',
+      list: [
+        'You must provide accurate, current, and complete information when registering.',
+        'You are responsible for keeping your account credentials confidential.',
+        'Notify us immediately of any unauthorized access to your account.',
+        'We reserve the right to suspend or terminate accounts involved in violations of these Terms.',
+      ],
     },
     {
-      title: '4. Document Submission & Authenticity',
-      body: `Users are solely responsible for the accuracy and authenticity of all documents uploaded to the Platform, including but not limited to: passports, national identity cards, academic transcripts, diplomas, language test certificates, letters of recommendation, and personal statements. Uploading forged, altered, or misleading documents constitutes fraud and may result in immediate account suspension, permanent ban, and referral to relevant legal authorities. riftApply reserves the right to verify documents through third-party verification services.`,
+      title: '4. User Roles',
+      body: 'The Platform supports:',
+      list: [
+        'Students: Individuals seeking university admission.',
+        'Agents: Verified education consultants.',
+        'University Representatives: Authorized personnel from partner institutions.',
+      ],
+      note: 'Misrepresenting your role may lead to immediate account termination.',
     },
     {
-      title: '5. Agent Responsibilities',
-      body: `Agents registered on riftApply must be duly authorised to represent students. Agents may not charge hidden fees to students beyond those disclosed on the Platform. Any fraudulent activity, misrepresentation, or abuse of the Platform by an agent will result in immediate removal and may be reported to regulatory authorities.`,
+      title: '5. Acceptable Use',
+      body: 'You agree not to:',
+      list: [
+        'Use the Platform for any illegal or fraudulent activity.',
+        'Upload or submit false, misleading, or forged documents.',
+        'Harass, threaten, or abuse other users.',
+        'Attempt to reverse engineer, scrape, or unauthorizedly access the Platform.',
+        'Transmit spam, viruses, or harmful code.',
+      ],
     },
     {
-      title: '6. University Partner Obligations',
-      body: `Universities listed on riftApply agree to process applications in good faith, provide accurate program information, and respond to student inquiries in a timely manner. riftApply reserves the right to remove any institution that does not comply with our quality standards.`,
+      title: '6. Agent Services',
+      list: [
+        'Agents on riftApply are verified by GreatRift Consultancy, but we do not guarantee the quality or success of their individual services.',
+        'All arrangements and payments between students and agents are made directly between them. riftApply / GreatRift Consultancy acts only as a platform facilitator.',
+        'Any fees charged by agents are separate from our platform services.',
+      ],
     },
     {
-      title: '7. Prohibited Activities',
-      body: `You agree not to: (a) upload false or misleading information or documents; (b) impersonate any person or entity; (c) attempt to gain unauthorised access to the Platform or other user accounts; (d) use the Platform for any unlawful purpose; (e) transmit spam, malware, or harmful code; (f) scrape, crawl, or harvest data without express written permission; (g) interfere with the security or integrity of the Platform.`,
+      title: '7. University Applications',
+      list: [
+        'We do not guarantee admission to any university.',
+        'All admission decisions are made solely by the respective universities.',
+        'We are not responsible for visa outcomes, scholarship results, or changes in university policies.',
+      ],
     },
     {
       title: '8. Intellectual Property',
-      body: `All content on the Platform — including text, graphics, logos, software, and data — is the exclusive property of riftApply or its licensors and is protected by applicable intellectual property laws. You may not reproduce, distribute, or create derivative works without prior written consent.`,
+      body: 'All content, logos, designs, and software on riftApply are the property of GreatRift Consultancy. You are granted a limited, revocable, non-exclusive license to use the Services for personal educational purposes only. You retain ownership of the documents you upload but grant us a royalty-free license to use them as needed to provide the Services.',
     },
     {
-      title: '9. Payment & Fees',
-      body: `Student registration and application submission are free of charge. Service fees may apply for premium features or agent services. All fees are clearly disclosed before any transaction. Payments are processed securely through third-party payment providers. riftApply does not store full payment card details.`,
+      title: '9. Privacy',
+      body: 'Your privacy is important to us. Please read our Privacy Policy for details on how we collect, use, and protect your data.',
     },
     {
-      title: '10. Limitation of Liability',
-      body: `To the maximum extent permitted by law, riftApply shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from: (a) your use of or inability to use the Platform; (b) admission decisions made by universities; (c) errors in documents submitted by users; (d) delays caused by third parties. riftApply's total aggregate liability shall not exceed the fees paid by the user in the twelve months preceding the claim.`,
+      title: '10. Fees and Payments',
+      list: [
+        'Basic use of the platform is currently free.',
+        'Premium features, agent services, or third-party services may attract fees.',
+        'Refunds (if any) are governed by the specific provider\'s policy.',
+      ],
     },
     {
-      title: '11. Disclaimer of Warranties',
-      body: `The Platform is provided "as is" and "as available" without warranties of any kind, either express or implied. riftApply does not warrant that the Platform will be uninterrupted, error-free, or free of viruses or other harmful components.`,
+      title: '11. Disclaimers',
+      body: 'The Services are provided "AS IS" and "AS AVAILABLE" without any warranties, express or implied. We do not guarantee uninterrupted access, error-free operation, or successful admission outcomes.',
     },
     {
-      title: '12. Account Termination',
-      body: `riftApply reserves the right to suspend or permanently terminate any account at its sole discretion, with or without notice, for violations of these Terms, fraudulent activity, or behaviour harmful to other users or the integrity of the Platform.`,
+      title: '12. Limitation of Liability',
+      body: 'To the fullest extent permitted by law, GreatRift Consultancy shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Platform. Our maximum liability shall not exceed the total amount paid by you (if any) in the twelve (12) months prior to the claim.',
     },
     {
-      title: '13. Modifications to Terms',
-      body: `riftApply reserves the right to modify these Terms at any time. Continued use of the Platform after changes constitutes your acceptance of the revised Terms. We will notify registered users of material changes via email or an in-Platform notice.`,
+      title: '13. Termination',
+      body: 'We may suspend or terminate your access to the Services at any time, with or without notice, for any reason, including breach of these Terms.',
     },
     {
       title: '14. Governing Law',
-      body: `These Terms shall be governed by and construed in accordance with applicable laws. Any disputes arising under these Terms shall be subject to the exclusive jurisdiction of the competent courts in the jurisdiction where riftApply is registered.`,
+      body: 'These Terms are governed by the laws of the Republic of Cameroon. Any disputes shall be resolved exclusively in the courts located in Yaoundé, Cameroon.',
     },
     {
-      title: '15. Contact',
-      body: `For questions regarding these Terms of Service, please contact us at: legal@riftapply.com`,
+      title: '15. Changes to Terms',
+      body: 'We may revise these Terms from time to time. We will notify you of significant changes by updating the Effective Date and posting the new version on this page. Continued use of the Platform after changes constitutes your acceptance of the updated Terms.',
+    },
+    {
+      title: '16. Contact Us',
+      body: 'For any questions regarding these Terms, please contact us at:',
+      list: [
+        'Email: support@riftapply.com',
+        'Phone: +237 693230485',
+        'Address: Yaoundé, Cameroon',
+      ],
     },
   ],
   fr: [
     {
-      title: '1. Acceptation des conditions',
-      body: `En accédant ou en utilisant la plateforme riftApply (« Plateforme »), vous acceptez d'être légalement lié par les présentes Conditions d'utilisation (« Conditions »). Si vous n'acceptez pas une partie de ces Conditions, vous ne devez pas utiliser la Plateforme. Ces Conditions s'appliquent à tous les utilisateurs, notamment les étudiants, agents, représentants d'universités et administrateurs.`,
+      title: '1. Nos Services',
+      body: 'riftApply est une plateforme internationale d\'admission universitaire détenue par GreatRift Consultancy. Nous mettons en relation les étudiants avec des universités accréditées dans plus de 30 pays via un processus de candidature simplifié et un réseau d\'agents éducatifs vérifiés.',
+      list: [
+        'Création de profils étudiants',
+        'Recherche et candidature auprès des universités partenaires',
+        'Mise en relation avec des agents vérifiés',
+        'Suivi des candidatures',
+        'Accompagnement tout au long du parcours d\'admission',
+      ],
     },
     {
-      title: '2. Description du service',
-      body: `riftApply est une plateforme d'admission universitaire en ligne qui facilite la soumission, le suivi et la gestion des candidatures entre les étudiants, les agents vérifiés et les universités partenaires. riftApply agit uniquement en tant qu'intermédiaire et ne garantit pas l'admission dans un établissement.`,
+      title: '2. Éligibilité',
+      body: 'Vous devez avoir au moins 18 ans (ou l\'âge de la majorité dans votre juridiction) pour utiliser nos Services. En utilisant la Plateforme, vous déclarez et garantissez que vous remplissez cette condition.',
+      note: 'Les étudiants de moins de 18 ans ne peuvent utiliser la Plateforme qu\'avec le consentement et la participation d\'un parent ou d\'un tuteur légal.',
     },
     {
-      title: '3. Comptes utilisateurs et éligibilité',
-      body: `Vous devez avoir au moins 16 ans pour créer un compte. Vous vous engagez à fournir des informations exactes, actuelles et complètes lors de l'inscription et à les mettre à jour. Chaque utilisateur ne peut maintenir qu'un seul compte. Le partage des identifiants est strictement interdit.`,
+      title: '3. Comptes Utilisateurs',
+      list: [
+        'Vous devez fournir des informations exactes, actuelles et complètes lors de votre inscription.',
+        'Vous êtes responsable de la confidentialité de vos identifiants de connexion.',
+        'Informez-nous immédiatement de tout accès non autorisé à votre compte.',
+        'Nous nous réservons le droit de suspendre ou de résilier les comptes impliqués dans des violations des présentes Conditions.',
+      ],
     },
     {
-      title: '4. Soumission de documents et authenticité',
-      body: `Les utilisateurs sont seuls responsables de l'exactitude et de l'authenticité de tous les documents téléchargés sur la Plateforme, notamment : passeports, cartes nationales d'identité, relevés de notes académiques, diplômes, certificats de tests linguistiques, lettres de recommandation et lettres de motivation. Le téléchargement de documents falsifiés, modifiés ou trompeurs constitue une fraude et peut entraîner la suspension immédiate du compte, un bannissement permanent et un signalement aux autorités compétentes. riftApply se réserve le droit de vérifier les documents via des services tiers.`,
+      title: '4. Rôles des Utilisateurs',
+      body: 'La Plateforme prend en charge :',
+      list: [
+        'Étudiants : personnes cherchant à être admises dans une université.',
+        'Agents : consultants en éducation vérifiés.',
+        'Représentants d\'universités : personnel autorisé des établissements partenaires.',
+      ],
+      note: 'Toute fausse représentation de votre rôle peut entraîner la résiliation immédiate de votre compte.',
     },
     {
-      title: '5. Responsabilités des agents',
-      body: `Les agents enregistrés sur riftApply doivent être dûment autorisés à représenter des étudiants. Les agents ne peuvent pas facturer des frais cachés aux étudiants au-delà de ceux divulgués sur la Plateforme. Toute activité frauduleuse ou abus de la Plateforme par un agent entraînera sa suppression immédiate et pourra être signalée aux autorités réglementaires.`,
+      title: '5. Utilisation Acceptable',
+      body: 'Vous vous engagez à ne pas :',
+      list: [
+        'Utiliser la Plateforme à des fins illégales ou frauduleuses.',
+        'Télécharger ou soumettre des documents faux, trompeurs ou falsifiés.',
+        'Harceler, menacer ou maltraiter d\'autres utilisateurs.',
+        'Tenter d\'effectuer de la rétro-ingénierie, du scraping ou d\'accéder sans autorisation à la Plateforme.',
+        'Transmettre des spams, des virus ou des codes nuisibles.',
+      ],
     },
     {
-      title: '6. Obligations des universités partenaires',
-      body: `Les universités référencées sur riftApply s'engagent à traiter les candidatures de bonne foi, à fournir des informations exactes sur les programmes et à répondre rapidement aux demandes des étudiants. riftApply se réserve le droit de retirer tout établissement ne respectant pas ses standards de qualité.`,
+      title: '6. Services des Agents',
+      list: [
+        'Les agents sur riftApply sont vérifiés par GreatRift Consultancy, mais nous ne garantissons pas la qualité ou le succès de leurs services individuels.',
+        'Tous les arrangements et paiements entre étudiants et agents se font directement entre eux. riftApply / GreatRift Consultancy agit uniquement comme facilitateur de plateforme.',
+        'Tous les frais facturés par les agents sont distincts des services de notre plateforme.',
+      ],
     },
     {
-      title: '7. Activités interdites',
-      body: `Vous vous engagez à ne pas : (a) télécharger des informations ou documents faux ou trompeurs ; (b) usurper l'identité de toute personne ou entité ; (c) tenter d'accéder sans autorisation à la Plateforme ou à d'autres comptes ; (d) utiliser la Plateforme à des fins illégales ; (e) transmettre des spams, logiciels malveillants ou codes nuisibles ; (f) extraire des données sans autorisation écrite expresse ; (g) perturber la sécurité ou l'intégrité de la Plateforme.`,
+      title: '7. Candidatures Universitaires',
+      list: [
+        'Nous ne garantissons pas l\'admission dans une université.',
+        'Toutes les décisions d\'admission sont prises uniquement par les universités respectives.',
+        'Nous ne sommes pas responsables des résultats de visa, des résultats de bourses ou des changements de politique universitaire.',
+      ],
     },
     {
-      title: '8. Propriété intellectuelle',
-      body: `Tout le contenu de la Plateforme — textes, graphiques, logos, logiciels et données — est la propriété exclusive de riftApply ou de ses concédants et est protégé par les lois sur la propriété intellectuelle. Vous ne pouvez pas reproduire, distribuer ou créer des œuvres dérivées sans consentement écrit préalable.`,
+      title: '8. Propriété Intellectuelle',
+      body: 'Tout le contenu, les logos, les designs et les logiciels de riftApply sont la propriété de GreatRift Consultancy. Vous bénéficiez d\'une licence limitée, révocable et non exclusive pour utiliser les Services à des fins éducatives personnelles uniquement. Vous conservez la propriété des documents que vous téléchargez, mais nous accordez une licence sans redevance pour les utiliser dans le cadre de la fourniture des Services.',
     },
     {
-      title: '9. Paiements et frais',
-      body: `L'inscription des étudiants et la soumission des candidatures sont gratuites. Des frais de service peuvent s'appliquer pour des fonctionnalités premium ou des services d'agents. Tous les frais sont clairement indiqués avant toute transaction. Les paiements sont traités de manière sécurisée via des prestataires de paiement tiers. riftApply ne stocke pas les données complètes de carte de paiement.`,
+      title: '9. Confidentialité',
+      body: 'Votre vie privée est importante pour nous. Veuillez consulter notre Politique de Confidentialité pour en savoir plus sur la façon dont nous collectons, utilisons et protégeons vos données.',
     },
     {
-      title: '10. Limitation de responsabilité',
-      body: `Dans les limites permises par la loi, riftApply ne saurait être tenu responsable des dommages indirects, accessoires, spéciaux, consécutifs ou punitifs résultant de : (a) votre utilisation ou incapacité à utiliser la Plateforme ; (b) décisions d'admission prises par des universités ; (c) erreurs dans les documents soumis par les utilisateurs ; (d) retards causés par des tiers. La responsabilité totale de riftApply ne dépassera pas les frais payés par l'utilisateur au cours des douze mois précédant la réclamation.`,
+      title: '10. Frais et Paiements',
+      list: [
+        'L\'utilisation de base de la plateforme est actuellement gratuite.',
+        'Des fonctionnalités premium, des services d\'agents ou des services tiers peuvent entraîner des frais.',
+        'Les remboursements (le cas échéant) sont régis par la politique du prestataire concerné.',
+      ],
     },
     {
-      title: '11. Exclusion de garanties',
-      body: `La Plateforme est fournie « telle quelle » et « selon disponibilité », sans garantie d'aucune sorte, expresse ou implicite. riftApply ne garantit pas que la Plateforme sera ininterrompue, exempte d'erreurs ou de virus.`,
+      title: '11. Avertissements',
+      body: 'Les Services sont fournis « EN L\'ÉTAT » et « SELON DISPONIBILITÉ », sans aucune garantie, expresse ou implicite. Nous ne garantissons pas un accès ininterrompu, un fonctionnement sans erreur ni des résultats d\'admission réussis.',
     },
     {
-      title: '12. Résiliation du compte',
-      body: `riftApply se réserve le droit de suspendre ou de résilier définitivement tout compte à sa seule discrétion, avec ou sans préavis, en cas de violations des présentes Conditions, d'activité frauduleuse ou de comportement nuisible à d'autres utilisateurs ou à l'intégrité de la Plateforme.`,
+      title: '12. Limitation de Responsabilité',
+      body: 'Dans toute la mesure permise par la loi, GreatRift Consultancy ne saurait être tenue responsable des dommages indirects, accessoires ou consécutifs résultant de votre utilisation de la Plateforme. Notre responsabilité maximale ne dépassera pas le montant total payé par vous (le cas échéant) au cours des douze (12) mois précédant la réclamation.',
     },
     {
-      title: '13. Modifications des conditions',
-      body: `riftApply se réserve le droit de modifier les présentes Conditions à tout moment. La poursuite de l'utilisation de la Plateforme après les modifications constitue votre acceptation des Conditions révisées. Nous notifierons les utilisateurs enregistrés des modifications importantes par e-mail ou via un avis sur la Plateforme.`,
+      title: '13. Résiliation',
+      body: 'Nous pouvons suspendre ou résilier votre accès aux Services à tout moment, avec ou sans préavis, pour quelque raison que ce soit, y compris en cas de violation des présentes Conditions.',
     },
     {
-      title: '14. Droit applicable',
-      body: `Les présentes Conditions sont régies et interprétées conformément aux lois applicables. Tout litige découlant de ces Conditions sera soumis à la compétence exclusive des tribunaux compétents dans la juridiction où riftApply est enregistré.`,
+      title: '14. Droit Applicable',
+      body: 'Les présentes Conditions sont régies par les lois de la République du Cameroun. Tout litige sera résolu exclusivement devant les tribunaux compétents de Yaoundé, Cameroun.',
     },
     {
-      title: '15. Contact',
-      body: `Pour toute question concernant les présentes Conditions d'utilisation, veuillez nous contacter à : legal@riftapply.com`,
+      title: '15. Modifications des Conditions',
+      body: 'Nous pouvons réviser les présentes Conditions de temps à autre. Nous vous informerons des modifications importantes en mettant à jour la Date d\'entrée en vigueur et en publiant la nouvelle version sur cette page. La poursuite de l\'utilisation de la Plateforme après les modifications constitue votre acceptation des Conditions mises à jour.',
+    },
+    {
+      title: '16. Contactez-nous',
+      body: 'Pour toute question concernant les présentes Conditions, veuillez nous contacter à :',
+      list: [
+        'E-mail : support@riftapply.com',
+        'Téléphone : +237 693230485',
+        'Adresse : Yaoundé, Cameroun',
+      ],
     },
   ],
 };
@@ -156,7 +257,11 @@ export default function TermsOfServicePage() {
             </div>
           </div>
           <h1 className="text-3xl font-bold mb-2">{T(t.termsPage.title)}</h1>
-          <p className="text-blue-200 text-sm">{T(t.termsPage.subtitle)}</p>
+          <p className="text-blue-200 text-sm">
+            {lang === 'en'
+              ? 'riftApply · Owned and operated by GreatRift Consultancy, Yaoundé, Cameroon'
+              : 'riftApply · Détenu et exploité par GreatRift Consultancy, Yaoundé, Cameroun'}
+          </p>
           <p className="text-blue-400 text-xs mt-3">
             {T(t.common.lastUpdated)}: {lang === 'en' ? 'May 26, 2026' : '26 mai 2026'}
           </p>
@@ -170,8 +275,8 @@ export default function TermsOfServicePage() {
           <div className="bg-blue-50 border-b border-blue-100 px-8 py-5">
             <p className="text-sm text-blue-800 leading-relaxed">
               {lang === 'en'
-                ? 'These Terms of Service govern your use of the riftApply platform. By registering or using any part of our service, you confirm that you have read, understood, and agreed to be bound by these Terms. riftApply reserves the right to modify these Terms at any time.'
-                : 'Les présentes Conditions d\'utilisation régissent votre utilisation de la plateforme riftApply. En vous inscrivant ou en utilisant une partie de notre service, vous confirmez avoir lu, compris et accepté d\'être lié par ces Conditions. riftApply se réserve le droit de modifier ces Conditions à tout moment.'}
+                ? 'By accessing or using our website https://riftapply.com and any related services, you agree to be bound by these Terms of Service. If you do not agree to these Terms, please do not use our Services.'
+                : 'En accédant ou en utilisant notre site https://riftapply.com et tout service associé, vous acceptez d\'être lié par les présentes Conditions d\'utilisation. Si vous n\'acceptez pas ces Conditions, veuillez ne pas utiliser nos Services.'}
             </p>
           </div>
 
@@ -180,7 +285,19 @@ export default function TermsOfServicePage() {
             {sections.map((s, i) => (
               <div key={i} className="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
                 <h2 className="text-lg font-bold text-[#0f2544] mb-3">{s.title}</h2>
-                <p className="text-gray-600 text-sm leading-relaxed">{s.body}</p>
+                {s.body && (
+                  <p className="text-gray-600 text-sm leading-relaxed mb-3">{s.body}</p>
+                )}
+                {s.list && (
+                  <ul className="list-disc list-inside space-y-1.5 mb-3">
+                    {s.list.map((item, j) => (
+                      <li key={j} className="text-gray-600 text-sm leading-relaxed">{item}</li>
+                    ))}
+                  </ul>
+                )}
+                {s.note && (
+                  <p className="text-gray-500 text-sm italic leading-relaxed">{s.note}</p>
+                )}
               </div>
             ))}
           </div>
