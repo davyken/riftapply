@@ -10,13 +10,13 @@ import { PageLoader, ErrorBanner, EmptyState } from '@/components/ui/PageLoader'
 interface DeleteModal { id: string; name: string }
 
 export default function AdminStudentsPage() {
-  const [students,    setStudents]    = useState<any[]>([]);
-  const [loading,     setLoading]     = useState(true);
-  const [error,       setError]       = useState('');
-  const [query,       setQuery]       = useState('');
-  const [expanded,    setExpanded]    = useState<string | null>(null);
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState<DeleteModal | null>(null);
-  const [deleting,    setDeleting]    = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true); setError('');
@@ -190,12 +190,12 @@ export default function AdminStudentsPage() {
                   {open && (
                     <div className="px-5 pb-5 pt-3 bg-gray-50 border-t border-gray-100">
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <DetailCell icon={<Mail size={12} />}     label="Email"          value={student.email} />
-                        <DetailCell icon={<Phone size={12} />}    label="Phone"          value={student.phone || '—'} />
-                        <DetailCell icon={<MapPin size={12} />}   label="City"           value={student.city || '—'} />
-                        <DetailCell icon={<BookOpen size={12} />} label="Desired Field"  value={student.desiredField || '—'} />
-                        <DetailCell icon={<GraduationCap size={12} />} label="Desired Module" value={student.desiredModule || '—'} />
-                        <DetailCell icon={<Calendar size={12} />} label="Registered"     value={new Date(student.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} />
+                        <DetailCell icon={<Mail size={12} />} label="Email" value={student.email} />
+                        <DetailCell icon={<Phone size={12} />} label="Phone" value={student.phone || '—'} />
+                        <DetailCell icon={<MapPin size={12} />} label="City" value={student.city || '—'} />
+                        <DetailCell icon={<BookOpen size={12} />} label="Desired Field" value={student.desiredField || '—'} />
+                        <DetailCell icon={<GraduationCap size={12} />} label="Desired Specification" value={student.desiredModule || '—'} />
+                        <DetailCell icon={<Calendar size={12} />} label="Registered" value={new Date(student.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} />
                       </div>
                     </div>
                   )}
