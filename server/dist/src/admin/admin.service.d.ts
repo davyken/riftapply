@@ -94,6 +94,15 @@ export declare class AdminService {
     } & {
         id: string;
     }, {}, UserDocument, "find", {}>;
+    broadcastEmail(dto: {
+        subject: string;
+        message: string;
+        roles?: string[];
+    }): Promise<{
+        sent: number;
+        failed: number;
+        total: number;
+    }>;
     deleteAgent(id: string): Promise<{
         deleted: boolean;
     }>;

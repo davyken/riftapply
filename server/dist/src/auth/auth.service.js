@@ -84,8 +84,11 @@ let AuthService = class AuthService {
     }
     async registerStudent(dto, avatarFile) {
         const exists = await this.userModel.findOne({ email: dto.email.toLowerCase() });
-        if (exists)
-            throw new common_1.ConflictException('Email already in use');
+        if (exists) {
+            if (exists.emailVerified)
+                throw new common_1.ConflictException('Email already in use');
+            await this.userModel.deleteOne({ _id: exists._id });
+        }
         let avatarUrl = `/api/auth/avatar?name=${encodeURIComponent(dto.firstName + ' ' + dto.lastName)}`;
         if (avatarFile) {
             const result = await this.cloudinaryService.uploadFile(avatarFile, 'students/avatars');
@@ -111,8 +114,11 @@ let AuthService = class AuthService {
     }
     async registerAgent(dto, files) {
         const exists = await this.agentModel.findOne({ email: dto.email.toLowerCase() });
-        if (exists)
-            throw new common_1.ConflictException('Email already in use');
+        if (exists) {
+            if (exists.emailVerified)
+                throw new common_1.ConflictException('Email already in use');
+            await this.agentModel.deleteOne({ _id: exists._id });
+        }
         if (dto.agentType === enums_1.AgentType.PERSONAL && !files?.cniDocument?.[0]) {
             throw new common_1.BadRequestException('CNI document is required for personal accounts');
         }
@@ -152,8 +158,11 @@ let AuthService = class AuthService {
     }
     async registerUniversity(dto, logo) {
         const exists = await this.universityModel.findOne({ email: dto.email.toLowerCase() });
-        if (exists)
-            throw new common_1.ConflictException('Email already in use');
+        if (exists) {
+            if (exists.emailVerified)
+                throw new common_1.ConflictException('Email already in use');
+            await this.universityModel.deleteOne({ _id: exists._id });
+        }
         const hashed = await bcrypt.hash(dto.password, 10);
         const uniData = {
             ...dto,

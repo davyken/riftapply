@@ -46,7 +46,11 @@ export class AuthService {
 
   async registerStudent(dto: RegisterStudentDto, avatarFile?: Express.Multer.File) {
     const exists = await this.userModel.findOne({ email: dto.email.toLowerCase() });
-    if (exists) throw new ConflictException('Email already in use');
+    if (exists) {
+      if (exists.emailVerified) throw new ConflictException('Email already in use');
+      // Stale unverified account — remove it so this attempt can proceed
+      await this.userModel.deleteOne({ _id: exists._id });
+    }
 
     let avatarUrl = `/api/auth/avatar?name=${encodeURIComponent(dto.firstName + ' ' + dto.lastName)}`;
     if (avatarFile) {
@@ -84,7 +88,10 @@ export class AuthService {
     },
   ) {
     const exists = await this.agentModel.findOne({ email: dto.email.toLowerCase() });
-    if (exists) throw new ConflictException('Email already in use');
+    if (exists) {
+      if (exists.emailVerified) throw new ConflictException('Email already in use');
+      await this.agentModel.deleteOne({ _id: exists._id });
+    }
 
     if (dto.agentType === AgentType.PERSONAL && !files?.cniDocument?.[0]) {
       throw new BadRequestException('CNI document is required for personal accounts');
@@ -132,7 +139,10 @@ export class AuthService {
 
   async registerUniversity(dto: RegisterUniversityDto, logo?: Express.Multer.File) {
     const exists = await this.universityModel.findOne({ email: dto.email.toLowerCase() });
-    if (exists) throw new ConflictException('Email already in use');
+    if (exists) {
+      if (exists.emailVerified) throw new ConflictException('Email already in use');
+      await this.universityModel.deleteOne({ _id: exists._id });
+    }
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const uniData: any = {

@@ -11,5 +11,6 @@ export declare class MailService {
         subject: string;
         html: string;
     }): Promise<void>;
+    sendBroadcast(to: string, subject: string, message: string): Promise<void>;
     sendPasswordResetCode(to: string, code: string, name: string): Promise<void>;
 }

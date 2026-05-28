@@ -89,6 +89,9 @@ let AdminController = class AdminController {
         }
         return this.adminService.buildWaitingEmailTemplate(candidateName, universityName);
     }
+    broadcastEmail(body) {
+        return this.adminService.broadcastEmail(body);
+    }
     migrateUniversityIds() {
         return this.adminService.migrateUniversityIds();
     }
@@ -248,6 +251,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getEmailTemplate", null);
+__decorate([
+    (0, common_1.Post)('broadcast-email'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "broadcastEmail", null);
 __decorate([
     (0, common_1.Post)('migrate/university-ids'),
     __metadata("design:type", Function),

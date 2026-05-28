@@ -174,6 +174,15 @@ export declare class AdminController {
         subject: string;
         body: string;
     };
+    broadcastEmail(body: {
+        subject: string;
+        message: string;
+        roles?: string[];
+    }): Promise<{
+        sent: number;
+        failed: number;
+        total: number;
+    }>;
     migrateUniversityIds(): Promise<{
         modifiedCount: number;
         message: string;

@@ -80,6 +80,39 @@ let AdminService = class AdminService {
             .select('-password')
             .sort({ createdAt: -1 });
     }
+    async broadcastEmail(dto) {
+        const { subject, message, roles } = dto;
+        const emails = [];
+        const includeAll = !roles || roles.length === 0 || roles.includes('all');
+        if (includeAll || roles.includes('student')) {
+            const students = await this.userModel
+                .find({ role: enums_1.UserRole.STUDENT, emailVerified: true })
+                .select('email');
+            emails.push(...students.map((u) => u.email));
+        }
+        if (includeAll || roles.includes('agent')) {
+            const agents = await this.agentModel
+                .find({ emailVerified: true })
+                .select('email');
+            emails.push(...agents.map((a) => a.email));
+        }
+        if (includeAll || roles.includes('university')) {
+            const unis = await this.universityModel
+                .find({ emailVerified: true })
+                .select('email');
+            emails.push(...unis.map((u) => u.email));
+        }
+        const uniqueEmails = [...new Set(emails)];
+        let sent = 0;
+        let failed = 0;
+        const BATCH_SIZE = 50;
+        for (let i = 0; i < uniqueEmails.length; i += BATCH_SIZE) {
+            const batch = uniqueEmails.slice(i, i + BATCH_SIZE);
+            const results = await Promise.allSettled(batch.map((email) => this.mailService.sendBroadcast(email, subject, message)));
+            results.forEach((r) => (r.status === 'fulfilled' ? sent++ : failed++));
+        }
+        return { sent, failed, total: uniqueEmails.length };
+    }
     async deleteAgent(id) {
         const agent = await this.agentModel.findByIdAndDelete(id);
         if (!agent)
