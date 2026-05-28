@@ -103,6 +103,17 @@ export declare class AdminService {
         failed: number;
         total: number;
     }>;
+    sendCustomBulkEmail(dto: {
+        fromName: string;
+        replyTo?: string;
+        recipients: string[];
+        subject: string;
+        message: string;
+    }): Promise<{
+        sent: number;
+        failed: number;
+        total: number;
+    }>;
     deleteAgent(id: string): Promise<{
         deleted: boolean;
     }>;

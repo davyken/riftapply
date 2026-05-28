@@ -92,6 +92,9 @@ let AdminController = class AdminController {
     broadcastEmail(body) {
         return this.adminService.broadcastEmail(body);
     }
+    sendCustomBulkEmail(body) {
+        return this.adminService.sendCustomBulkEmail(body);
+    }
     migrateUniversityIds() {
         return this.adminService.migrateUniversityIds();
     }
@@ -258,6 +261,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "broadcastEmail", null);
+__decorate([
+    (0, common_1.Post)('custom-bulk-email'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "sendCustomBulkEmail", null);
 __decorate([
     (0, common_1.Post)('migrate/university-ids'),
     __metadata("design:type", Function),

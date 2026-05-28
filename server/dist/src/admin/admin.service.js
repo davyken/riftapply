@@ -113,6 +113,28 @@ let AdminService = class AdminService {
         }
         return { sent, failed, total: uniqueEmails.length };
     }
+    async sendCustomBulkEmail(dto) {
+        const { fromName, replyTo, recipients, subject, message } = dto;
+        const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const uniqueEmails = [
+            ...new Set(recipients
+                .map((e) => e.trim().toLowerCase())
+                .filter((e) => EMAIL_RE.test(e))),
+        ];
+        if (uniqueEmails.length === 0)
+            throw new common_1.BadRequestException('No valid recipient emails provided');
+        if (uniqueEmails.length > 600)
+            throw new common_1.BadRequestException('Maximum 600 recipients per send');
+        let sent = 0;
+        let failed = 0;
+        const BATCH_SIZE = 50;
+        for (let i = 0; i < uniqueEmails.length; i += BATCH_SIZE) {
+            const batch = uniqueEmails.slice(i, i + BATCH_SIZE);
+            const results = await Promise.allSettled(batch.map((email) => this.mailService.sendCustomBulk(email, fromName, replyTo, subject, message)));
+            results.forEach((r) => (r.status === 'fulfilled' ? sent++ : failed++));
+        }
+        return { sent, failed, total: uniqueEmails.length };
+    }
     async deleteAgent(id) {
         const agent = await this.agentModel.findByIdAndDelete(id);
         if (!agent)

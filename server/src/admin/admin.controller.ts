@@ -157,6 +157,20 @@ export class AdminController {
     return this.adminService.broadcastEmail(body);
   }
 
+  // ─── Custom Bulk Email ────────────────────────────────────────────
+  @Post('custom-bulk-email')
+  sendCustomBulkEmail(
+    @Body() body: {
+      fromName: string;
+      replyTo?: string;
+      recipients: string[];
+      subject: string;
+      message: string;
+    },
+  ) {
+    return this.adminService.sendCustomBulkEmail(body);
+  }
+
   // ─── Migrations ───────────────────────────────────────────────────
   @Post('migrate/university-ids')
   migrateUniversityIds() {

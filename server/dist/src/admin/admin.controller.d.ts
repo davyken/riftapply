@@ -183,6 +183,17 @@ export declare class AdminController {
         failed: number;
         total: number;
     }>;
+    sendCustomBulkEmail(body: {
+        fromName: string;
+        replyTo?: string;
+        recipients: string[];
+        subject: string;
+        message: string;
+    }): Promise<{
+        sent: number;
+        failed: number;
+        total: number;
+    }>;
     migrateUniversityIds(): Promise<{
         modifiedCount: number;
         message: string;

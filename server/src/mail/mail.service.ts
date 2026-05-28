@@ -88,6 +88,37 @@ export class MailService {
     });
   }
 
+  async sendCustomBulk(
+    to: string,
+    fromName: string,
+    replyTo: string | undefined,
+    subject: string,
+    message: string,
+  ): Promise<void> {
+    const safeMessage = message.replace(/\n/g, '<br>');
+    await this.resend.emails.send({
+      from: `${fromName} <${this.fromEmail}>`,
+      to,
+      ...(replyTo ? { replyTo } : {}),
+      subject,
+      html: `
+        <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:520px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#0f2544 0%,#1a3a6b 100%);padding:32px 40px;">
+            <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:-0.3px;">riftApply</h1>
+            <p style="margin:4px 0 0;color:#93c5fd;font-size:13px;">University Admissions Platform</p>
+          </div>
+          <div style="padding:36px 40px;">
+            <h2 style="margin:0 0 16px;color:#111827;font-size:18px;font-weight:700;">${subject}</h2>
+            <div style="color:#374151;font-size:14px;line-height:1.7;">${safeMessage}</div>
+          </div>
+          <div style="background:#f9fafb;padding:16px 40px;border-top:1px solid #e5e7eb;">
+            <p style="margin:0;color:#9ca3af;font-size:11px;text-align:center;">© ${new Date().getFullYear()} GreatRift Consultancy · Yaoundé, Cameroon · <a href="https://riftapply.com" style="color:#9ca3af;">riftapply.com</a></p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
   async sendPasswordResetCode(to: string, code: string, name: string): Promise<void> {
     try {
       await this.resend.emails.send({

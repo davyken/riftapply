@@ -52,4 +52,13 @@ export const adminApi = {
   // Broadcast email
   broadcastEmail: (data: { subject: string; message: string; roles?: string[] }) =>
     api.post('/admin/broadcast-email', data),
+
+  // Custom bulk email
+  sendCustomBulkEmail: (data: {
+    fromName: string;
+    replyTo?: string;
+    recipients: string[];
+    subject: string;
+    message: string;
+  }) => api.post('/admin/custom-bulk-email', data),
 };
